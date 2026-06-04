@@ -1,10 +1,40 @@
+// CONFIGURAÇÃO DO FIREBASE
+const firebaseConfig = {
+    apiKey: "AIzaSyBnBN7t588RgDT6pC_u0X7Lwnhh--SimGI",
+    authDomain: "dream-page-c539b.firebaseapp.com",
+    databaseURL: "https://dream-page-c539b-default-rtdb.firebaseio.com",
+    projectId: "dream-page-c539b",
+    storageBucket: "dream-page-c539b.firebasestorage.app",
+    messagingSenderId: "796088572727",
+    appId: "1:796088572727:web:8a568c473e0e14bcb998b2"
+};
+
+// Inicializa o Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
 const PALAVRA_CHAVE = "nostalgia"; 
 
-let meusItens = JSON.parse(localStorage.getItem('dreamPageItems')) || [];
+let meusItens = [];
 
-// Variáveis de controle para rastrear onde o usuário está navegando manualmente ou via busca
+// Variáveis de controle de navegação
 let currentPageContext = '';
 let currentCategoryContext = '';
+
+// ESCUTA ATIVA DO FIREBASE: Atualiza em tempo real em todos os dispositivos logados
+database.ref('dreamPageItems').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+        // Converte o objeto do Firebase de volta para uma Array
+        meusItens = Object.keys(data).map(key => ({
+            firebaseKey: key, // guardamos a chave gerada pelo firebase para exclusão posterior
+            ...data[key]
+        }));
+    } else {
+        meusItens = [];
+    }
+    renderItems(); // Re-renderiza a tela sempre que houver mudanças no banco
+});
 
 function checkPassword() {
     const input = document.getElementById('password-input').value.toLowerCase().trim();
@@ -18,7 +48,7 @@ function checkPassword() {
     }
 }
 
-/* 1. Altera a página principal (Filmes, Séries, Livros, Jogos, Sentimento) */
+/* 1. Altera a página principal */
 function switchPage(pageId, button) {
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -26,15 +56,11 @@ function switchPage(pageId, button) {
     document.getElementById(pageId).classList.add('active');
     if(button) button.classList.add('active');
     
-    // Oculta o menu secundário de status e o botão voltar ao alternar o menu principal
     document.getElementById('back-btn').style.display = 'none';
     document.getElementById('main-nav').style.display = 'flex';
 
-    // Reseta os contextos de página ao clicar no menu principal
     currentPageContext = '';
     currentCategoryContext = '';
-
-    // Limpa a barra de pesquisa para que todos os itens voltem a aparecer normalmente
     document.getElementById('search-input').value = '';
 }
 
@@ -43,30 +69,23 @@ function openSubPage(page, category) {
     currentPageContext = page;
     currentCategoryContext = category;
 
-    // Esconde os menus principais e ativa a tela de exibição de subpágina
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('subpage-view').classList.add('active');
-    
     document.getElementById('main-nav').style.display = 'none';
     
-    // Configura o botão Voltar
     const backBtn = document.getElementById('back-btn');
     backBtn.style.display = 'inline-block';
     backBtn.onclick = function() {
         switchPage(page, document.querySelector(`[onclick*="${page}"]`));
     };
 
-    // Atualiza o título da subpágina
     document.getElementById('subpage-title').textContent = `${page.toUpperCase()} > ${category.toUpperCase()}`;
 
-    // Renderiza os itens salvos nesta categoria para visualização manual
     renderItems();
-    
-    // Mostra por padrão a aba de "Vistos" ao entrar manualmente
     filterStatusView('visto');
 }
 
-/* 3. Alterna entre as abas de Status (Visto, Não Visto, Em Processo) dentro da subpágina */
+/* 3. Alterna entre as abas de Status */
 function filterStatusView(status) {
     document.querySelectorAll('.status-container-view').forEach(el => el.style.display = 'none');
     document.querySelectorAll('.status-nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -75,17 +94,19 @@ function filterStatusView(status) {
     document.getElementById(`btn-status-${status}`).classList.add('active');
 }
 
-/* 4. RENDERIZAR ITENS (Garante exibição tanto na navegação manual quanto na busca) */
+/* 4. RENDERIZAR ITENS */
 function renderItems() {
-    // Limpa as 3 grids de visualização da subpágina atual
-    document.getElementById('grid-visto').innerHTML = '';
-    document.getElementById('grid-naovisto').innerHTML = '';
-    document.getElementById('grid-emprocesso').innerHTML = '';
+    // Garante que os elementos existem na tela antes de limpar
+    const gridVisto = document.getElementById('grid-visto');
+    const gridNaovisto = document.getElementById('grid-naovisto');
+    const gridEmprocesso = document.getElementById('grid-emprocesso');
 
-    // Se não houver uma subpágina selecionada no momento, não renderiza nada nas grids abaixo
+    if (gridVisto) gridVisto.innerHTML = '';
+    if (gridNaovisto) gridNaovisto.innerHTML = '';
+    if (gridEmprocesso) gridEmprocesso.innerHTML = '';
+
     if (!currentPageContext || !currentCategoryContext) return;
 
-    // Varre e insere os itens correspondentes à categoria atual
     meusItens.forEach(item => {
         if (item.page === currentPageContext && item.category === currentCategoryContext) {
             const gridContainer = document.getElementById(`grid-${item.status}`);
@@ -94,8 +115,9 @@ function renderItems() {
                 const card = document.createElement('div');
                 card.className = 'item-card';
                 card.setAttribute('data-name', item.name.toLowerCase()); 
+                // Passamos a propriedade item.firebaseKey entre aspas simples para a função deleteItem
                 card.innerHTML = `
-                    <button class="delete-btn" onclick="deleteItem(${item.id})">✕</button>
+                    <button class="delete-btn" onclick="deleteItem('${item.firebaseKey}')">✕</button>
                     <img class="item-image" src="${item.image}" alt="Capa">
                     <div class="item-info">
                         <p class="item-name">${item.name}</p>
@@ -108,46 +130,36 @@ function renderItems() {
     });
 }
 
-/* 5. LÓGICA DE PESQUISA GLOBAL (Teleporta para o item e o exibe perfeitamente) */
+/* 5. LÓGICA DE PESQUISA GLOBAL */
 function filterItems() {
     const query = document.getElementById('search-input').value.toLowerCase().trim();
     
-    // Se a pesquisa for limpa, re-renderiza a página atual para mostrar todos os itens originais dela
     if (query === '') {
         renderItems();
         return;
     }
 
-    // Procura o item correspondente em toda a base de dados
     const itemEncontrado = meusItens.find(item => item.name.toLowerCase().includes(query));
 
     if (itemEncontrado) {
-        // Altera o contexto para a localização real do item encontrado
         currentPageContext = itemEncontrado.page;
         currentCategoryContext = itemEncontrado.category;
 
-        // Atualiza a interface gráfica para abrir a subpágina correta
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById('subpage-view').classList.add('active');
         document.getElementById('main-nav').style.display = 'none';
 
-        // Configura o botão de voltar baseado na página do item
         const backBtn = document.getElementById('back-btn');
         backBtn.style.display = 'inline-block';
         backBtn.onclick = function() {
             switchPage(itemEncontrado.page, document.querySelector(`[onclick*="${itemEncontrado.page}"]`));
         };
 
-        // Atualiza o título da subpágina
         document.getElementById('subpage-title').textContent = `${itemEncontrado.page.toUpperCase()} > ${itemEncontrado.category.toUpperCase()}`;
 
-        // Renderiza fisicamente os itens na tela
         renderItems();
-
-        // Abre a aba do status exato (visto / naovisto / emprocesso) onde o item está guardado
         filterStatusView(itemEncontrado.status);
 
-        // Aplica o filtro visual imediato ocultando os outros itens da mesma categoria e destacando o buscado
         document.querySelectorAll('.item-card').forEach(card => {
             const itemName = card.getAttribute('data-name');
             if (itemName.includes(query)) {
@@ -161,7 +173,6 @@ function filterItems() {
     }
 }
 
-/* Controle do Form Dinâmico do Modal */
 const categoriasPorPagina = {
     filmes: ['animados', 'naoanimados', 'doramas', 'animes', 'blgl'],
     series: ['desenhos', 'animes', 'novelas', 'real', 'doramas', 'blgl'],
@@ -186,10 +197,15 @@ function openModal() {
     updateFormCategories();
 }
 
+// Pequeno ajuste para limpar campos ao fechar
 function closeModal() {
     document.getElementById('item-modal').style.display = 'none';
+    document.getElementById('form-name').value = '';
+    document.getElementById('form-image').value = '';
+    document.getElementById('form-link').value = '';
 }
 
+/* SALVAR NO FIREBASE */
 function addItem() {
     const name = document.getElementById('form-name').value.trim();
     let image = document.getElementById('form-image').value.trim();
@@ -202,35 +218,38 @@ function addItem() {
     if (!image) image = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400"; 
 
     const newItem = { id: Date.now(), name, image, link, page, category, status };
-    meusItens.push(newItem);
-    localStorage.setItem('dreamPageItems', JSON.stringify(meusItens));
+    
+    // Envia o item para o Firebase em vez do localStorage
+    database.ref('dreamPageItems').push(newItem);
     
     closeModal();
     
-    // Define o contexto para a página do item recém-criado para renderizar na tela certa
     currentPageContext = page;
     currentCategoryContext = category;
     openSubPage(page, category);
     filterStatusView(status);
-
-    document.getElementById('form-name').value = '';
-    document.getElementById('form-image').value = '';
-    document.getElementById('form-link').value = '';
 }
 
-function deleteItem(id) {
+/* DELETAR NO FIREBASE */
+function deleteItem(firebaseKey) {
     if(confirm("Tem certeza que deseja apagar este item?")) {
-        meusItens = meusItens.filter(item => item.id !== id);
-        localStorage.setItem('dreamPageItems', JSON.stringify(meusItens));
-        renderItems();
+        // Remove do Firebase usando a chave única do item
+        database.ref(`dreamPageItems/${firebaseKey}`).remove();
     }
 }
 
-// Notas do sentimento
+// Sincronização das Notas de sentimento com o Firebase
 if(document.getElementById('feeling-notes')) {
-    document.getElementById('feeling-notes').value = localStorage.getItem('dreamPageNotes') || '';
+    // Busca a nota inicial do banco
+    database.ref('dreamPageNotes').once('value').then((snapshot) => {
+        if(snapshot.val()) {
+            document.getElementById('feeling-notes').value = snapshot.val();
+        }
+    });
+
+    // Envia as atualizações das notas para o Firebase conforme digita
     document.getElementById('feeling-notes').addEventListener('input', (e) => {
-        localStorage.setItem('dreamPageNotes', e.target.value);
+        database.ref('dreamPageNotes').set(e.target.value);
     });
 }
 
