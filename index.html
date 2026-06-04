@@ -1,143 +1,141 @@
 <!DOCTYPE html>
-< lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DreamPage</title>
-    <link rel="stylesheet" href="geral.css">
-</head>
-<body>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>DreamPage</title>
+        <link rel="stylesheet" href="geral.css">
+    </head>
+    <body>
+        <header>
+            <h1>💫 DreamPage 💫</h1>
+            <p>O portal para as maravilhas desse mundo, um baú com todos os meus tesouros escondidos.</p>
+        </header>
 
-    <header>
-        <h1>💫 DreamPage 💫</h1>
-        <p>O portal para as maravilhas desse mundo, um baú com todos os meus tesouros escondidos.</p>
-    </header>
-
-    <div class="container">
-        
-        <div id="login-screen">
-            <h3>Insira a palavra-chave para acessar</h3>
-            <p class="login-tip">(O sentimento/sensação que mais odeio)</p>
-            <input type="password" id="password-input" placeholder="Palavra-chave...">
-            <button onclick="checkPassword()">Entrar</button>
-            <p id="error-msg">Palavra-chave incorreta. Tente novamente.</p>
-        </div>
-
-        <div id="main-content">
-
-            <div class="search-container">
-                <input type="text" id="search-input" placeholder="Pesquisar pelo nome..." oninput="filterItems()">
-            </div>
-
-            <nav id="main-nav">
-                <button class="nav-btn active" onclick="switchPage('filmes', this)">Filmes</button>
-                <button class="nav-btn" onclick="switchPage('series', this)">Séries</button>
-                <button class="nav-btn" onclick="switchPage('livros', this)">Livros</button>
-                <button class="nav-btn" onclick="switchPage('jogos', this)">Jogos</button>
-            </nav>
-
-            <button id="back-btn" style="display: none; margin-bottom: 20px;" class="cancel-btn">⬅ Voltar</button>
-
-            <div id="filmes" class="page active">
-                <h2>🎬 Filmes - Escolha uma Categoria</h2>
-                <div class="menu-categorias">
-                    <button onclick="openSubPage('filmes', 'animados')">Animados</button>
-                    <button onclick="openSubPage('filmes', 'naoanimados')">Real-Life</button>
-                    <button onclick="openSubPage('filmes', 'doramas')">Doramas</button>
-                    <button onclick="openSubPage('filmes', 'animes')">Animes</button>
-                    <button onclick="openSubPage('filmes', 'blgl')">BGL</button>
-                </div>
-            </div>
-
-            <div id="series" class="page">
-                <h2>📺 Séries - Escolha uma Categoria</h2>
-                <div class="menu-categorias">
-                    <button onclick="openSubPage('series', 'desenhos')">Desenhos</button>
-                    <button onclick="openSubPage('series', 'animes')">Animes</button>
-                    <button onclick="openSubPage('series', 'novelas')">Novelas</button>
-                    <button onclick="openSubPage('series', 'real')">Real</button>
-                    <button onclick="openSubPage('series', 'doramas')">Doramas</button>
-                    <button onclick="openSubPage('series', 'blgl')">BGL</button>
-                </div>
-            </div>
-
-            <div id="livros" class="page">
-                <h2>📖 Livros - Escolha uma Categoria</h2>
-                <div class="menu-categorias">
-                    <button onclick="openSubPage('livros', 'novels')">Novels</button>
-                    <button onclick="openSubPage('livros', 'fisico')">Físicos</button>
-                    <button onclick="openSubPage('livros', 'webtoon')">Webtoons</button>
-                    <button onclick="openSubPage('livros', 'manga')">Mangás</button>
-                    <button onclick="openSubPage('livros', 'yaoiyuri')">BGL</button>
-                </div>
-            </div>
-
-            <div id="jogos" class="page">
-                <h2>🎮 Jogos - Escolha uma Categoria</h2>
-                <div class="menu-categorias">
-                    <button onclick="openSubPage('jogos', 'geral')">Geralzão</button>
-                </div>
-            </div>
-
-            <div id="subpage-view" class="page">
-                <h2 id="subpage-title">Categoria</h2>
-                
-                <div class="status-selector-nav">
-                    <button id="btn-status-visto" class="status-nav-btn" onclick="filterStatusView('visto')">Finalizado</button>
-                    <button id="btn-status-naovisto" class="status-nav-btn" onclick="filterStatusView('naovisto')">Um dia!</button>
-                    <button id="btn-status-emprocesso" class="status-nav-btn" onclick="filterStatusView('emprocesso')">Em Processo</button>
-                </div>
-
-                <div id="status-content-visto" class="status-container-view">
-                    <div class="items-grid" id="grid-visto"></div>
-                </div>
-                <div id="status-content-naovisto" class="status-container-view">
-                    <div class="items-grid" id="grid-naovisto"></div>
-                </div>
-                <div id="status-content-emprocesso" class="status-container-view">
-                    <div class="items-grid" id="grid-emprocesso"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <button id="add-floating-btn" onclick="openModal()">+</button>
-
-    <div id="item-modal" class="modal">
-        <div class="modal-content">
-            <h3>Adicionar Novo Tesouro</h3>
-            <input type="text" id="form-name" placeholder="Nome / Título" required>
-            <input type="text" id="form-image" placeholder="URL da Imagem de Capa">
-            <input type="text" id="form-link" placeholder="Link (Onde assistir/ler/jogar)">
+        <div class="container">
             
-            <label for="form-page">Seção Principal:</label>
-            <select id="form-page" onchange="updateFormCategories()">
-                <option value="filmes">Filmes</option>
-                <option value="series">Séries</option>
-                <option value="livros">Livros</option>
-                <option value="jogos">Jogos</option>
-            </select>
+            <div id="login-screen">
+                <h3>Insira a palavra-chave para acessar</h3>
+                <p class="login-tip">(O sentimento/sensação que mais odeio)</p>
+                <input type="password" id="password-input" placeholder="Palavra-chave...">
+                <button onclick="checkPassword()">Entrar</button>
+                <p id="error-msg">Palavra-chave incorreta. Tente novamente.</p>
+            </div>
 
-            <label for="form-category">Categoria:</label>
-            <select id="form-category"></select>
+            <div id="main-content">
 
-            <label for="form-status">Status:</label>
-            <select id="form-status">
-                <option value="visto">Finalizado</option>
-                <option value="naovisto">Um dia!</option>
-                <option value="emprocesso">Em processo</option>
-            </select>
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Pesquisar pelo nome..." oninput="filterItems()">
+                </div>
 
-            <div class="modal-actions">
-                <button onclick="closeModal()" class="cancel-btn">Cancelar</button>
-                <button onclick="addItem()" class="save-btn">Salvar</button>
+                <nav id="main-nav">
+                    <button class="nav-btn active" onclick="switchPage('filmes', this)">Filmes</button>
+                    <button class="nav-btn" onclick="switchPage('series', this)">Séries</button>
+                    <button class="nav-btn" onclick="switchPage('livros', this)">Livros</button>
+                    <button class="nav-btn" onclick="switchPage('jogos', this)">Jogos</button>
+                </nav>
+
+                <button id="back-btn" style="display: none; margin-bottom: 20px;" class="cancel-btn">⬅ Voltar</button>
+
+                <div id="filmes" class="page active">
+                    <h2>🎬 Filmes - Escolha uma Categoria</h2>
+                    <div class="menu-categorias">
+                        <button onclick="openSubPage('filmes', 'animados')">Animados</button>
+                        <button onclick="openSubPage('filmes', 'naoanimados')">Real-Life</button>
+                        <button onclick="openSubPage('filmes', 'doramas')">Doramas</button>
+                        <button onclick="openSubPage('filmes', 'animes')">Animes</button>
+                        <button onclick="openSubPage('filmes', 'blgl')">BGL</button>
+                    </div>
+                </div>
+
+                <div id="series" class="page">
+                    <h2>📺 Séries - Escolha uma Categoria</h2>
+                    <div class="menu-categorias">
+                        <button onclick="openSubPage('series', 'desenhos')">Desenhos</button>
+                        <button onclick="openSubPage('series', 'animes')">Animes</button>
+                        <button onclick="openSubPage('series', 'novelas')">Novelas</button>
+                        <button onclick="openSubPage('series', 'real')">Real</button>
+                        <button onclick="openSubPage('series', 'doramas')">Doramas</button>
+                        <button onclick="openSubPage('series', 'blgl')">BGL</button>
+                    </div>
+                </div>
+
+                <div id="livros" class="page">
+                    <h2>📖 Livros - Escolha uma Categoria</h2>
+                    <div class="menu-categorias">
+                        <button onclick="openSubPage('livros', 'novels')">Novels</button>
+                        <button onclick="openSubPage('livros', 'fisico')">Físicos</button>
+                        <button onclick="openSubPage('livros', 'webtoon')">Webtoons</button>
+                        <button onclick="openSubPage('livros', 'manga')">Mangás</button>
+                        <button onclick="openSubPage('livros', 'yaoiyuri')">BGL</button>
+                    </div>
+                </div>
+
+                <div id="jogos" class="page">
+                    <h2>🎮 Jogos - Escolha uma Categoria</h2>
+                    <div class="menu-categorias">
+                        <button onclick="openSubPage('jogos', 'geral')">Geralzão</button>
+                    </div>
+                </div>
+
+                <div id="subpage-view" class="page">
+                    <h2 id="subpage-title">Categoria</h2>
+                    
+                    <div class="status-selector-nav">
+                        <button id="btn-status-visto" class="status-nav-btn" onclick="filterStatusView('visto')">Finalizado</button>
+                        <button id="btn-status-naovisto" class="status-nav-btn" onclick="filterStatusView('naovisto')">Um dia!</button>
+                        <button id="btn-status-emprocesso" class="status-nav-btn" onclick="filterStatusView('emprocesso')">Em Processo</button>
+                    </div>
+
+                    <div id="status-content-visto" class="status-container-view">
+                        <div class="items-grid" id="grid-visto"></div>
+                    </div>
+                    <div id="status-content-naovisto" class="status-container-view">
+                        <div class="items-grid" id="grid-naovisto"></div>
+                    </div>
+                    <div id="status-content-emprocesso" class="status-container-view">
+                        <div class="items-grid" id="grid-emprocesso"></div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <script src="script.js"></script>
-    
-</body>
+        <button id="add-floating-btn" onclick="openModal()">+</button>
+
+        <div id="item-modal" class="modal">
+            <div class="modal-content">
+                <h3>Adicionar Novo Tesouro</h3>
+                <input type="text" id="form-name" placeholder="Nome / Título" required>
+                <input type="text" id="form-image" placeholder="URL da Imagem de Capa">
+                <input type="text" id="form-link" placeholder="Link (Onde assistir/ler/jogar)">
+                
+                <label for="form-page">Seção Principal:</label>
+                <select id="form-page" onchange="updateFormCategories()">
+                    <option value="filmes">Filmes</option>
+                    <option value="series">Séries</option>
+                    <option value="livros">Livros</option>
+                    <option value="jogos">Jogos</option>
+                </select>
+
+                <label for="form-category">Categoria:</label>
+                <select id="form-category"></select>
+
+                <label for="form-status">Status:</label>
+                <select id="form-status">
+                    <option value="visto">Finalizado</option>
+                    <option value="naovisto">Um dia!</option>
+                    <option value="emprocesso">Em processo</option>
+                </select>
+
+                <div class="modal-actions">
+                    <button onclick="closeModal()" class="cancel-btn">Cancelar</button>
+                    <button onclick="addItem()" class="save-btn">Salvar</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+        <script src="script.js"></script>
+    </body>
 </html>
