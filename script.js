@@ -174,9 +174,9 @@ function filterItems() {
 }
 
 const categoriasPorPagina = {
-    filmes: ['animados', 'naoanimados', 'doramas', 'animes', 'blgl'],
-    series: ['desenhos', 'animes', 'novelas', 'real', 'doramas', 'blgl'],
-    livros: ['novels', 'fisico', 'webtoon', 'manga', 'yaoiyuri'],
+    filmes: ['animados', 'real-life', 'doramas', 'animes'],
+    series: ['desenhos', 'animes', 'novelas', 'real-life', 'doramas'],
+    livros: ['fisico', 'webtoon', 'manga', 'BGL'],
     jogos: ['geral']
 };
 
