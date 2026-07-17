@@ -28,21 +28,21 @@ Terá uma página extra que aparecerá após a senha ser colocada que se chamar�
 
 Na página de filmes teremos 5 categorias(Páginas)
 
-[Filmes-Animados] [Filmes-Não-Animados] [Doramas] [Animes] [BL/GL]
+[Filmes-Animados] [Filmes-Não-Animados] [Doramas] [Animes]
 
 -----
 #### 📺 Series
 
 Nesta daqui teremos 6 categorias 
 
-[Desenhos] [Animes] [Novelas] [Real] [Doramas] [BL/GL]
+[Desenhos] [Animes] [Novelas] [Real] [Doramas]
 
 -----
 #### 📖 Livros
 
 Aqui tera 5 categorias
 
-[Novels] [Fisico] [Webtoon] [Mangá] [Yaoi/Yuri]
+[Fisico] [Webtoon] [Mangá] [BGL]
 
 -----
 #### 🎮 Jogos
