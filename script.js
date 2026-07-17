@@ -108,13 +108,16 @@ function renderItems() {
     if (!currentPageContext || !currentCategoryContext) return;
 
     meusItens.forEach(item => {
-        if (item.page === currentPageContext && item.category === currentCategoryContext) {
+        if (
+            item.page.toLowerCase() === currentPageContext.toLowerCase() &&
+            item.category.toLowerCase() === currentCategoryContext.toLowerCase()
+        ) {
             const gridContainer = document.getElementById(`grid-${item.status}`);
 
             if (gridContainer) {
                 const card = document.createElement('div');
                 card.className = 'item-card';
-                card.setAttribute('data-name', item.name.toLowerCase()); 
+                card.setAttribute('data-name', item.name.toLowerCase());
                 // Passamos a propriedade item.firebaseKey entre aspas simples para a função deleteItem
                 card.innerHTML = `
                     <button class="delete-btn" onclick="deleteItem('${item.firebaseKey}')">✕</button>
@@ -174,10 +177,31 @@ function filterItems() {
 }
 
 const categoriasPorPagina = {
-    filmes: ['animados', 'real', 'doramas', 'animes'],
-    series: ['desenhos', 'animes', 'novelas', 'real', 'doramas'],
-    livros: ['fisico', 'webtoon', 'manga', 'BGL'],
-    jogos: ['geral']
+    filmes: [
+        "animados",
+        "real",
+        "doramas",
+        "animes"
+    ],
+
+    series: [
+        "desenhos",
+        "animes",
+        "novelas",
+        "real",
+        "doramas"
+    ],
+
+    livros: [
+        "fisico",
+        "webtoon",
+        "manga",
+        "bgl"
+    ],
+
+    jogos: [
+        "geral"
+    ]
 };
 
 function updateFormCategories() {
