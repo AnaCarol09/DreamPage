@@ -45,19 +45,17 @@
                         <button onclick="openSubPage('filmes', 'naoanimados')">Real-Life</button>
                         <button onclick="openSubPage('filmes', 'doramas')">Doramas</button>
                         <button onclick="openSubPage('filmes', 'animes')">Animes</button>
-                        <button onclick="openSubPage('filmes', 'blgl')">BGL</button>
                     </div>
                 </div>
 
                 <div id="series" class="page">
                     <h2>📺 Séries - Escolha uma Categoria</h2>
                     <div class="menu-categorias">
-                        <button onclick="openSubPage('series', 'desenhos')">Desenhos</button>
+                        <button onclick="openSubPage('series', 'desenhos')">Animados</button>
                         <button onclick="openSubPage('series', 'animes')">Animes</button>
                         <button onclick="openSubPage('series', 'novelas')">Novelas</button>
-                        <button onclick="openSubPage('series', 'real')">Real</button>
+                        <button onclick="openSubPage('series', 'real')">Real-Life</button>
                         <button onclick="openSubPage('series', 'doramas')">Doramas</button>
-                        <button onclick="openSubPage('series', 'blgl')">BGL</button>
                     </div>
                 </div>
 
@@ -67,7 +65,7 @@
                         <button onclick="openSubPage('livros', 'fisico')">Físicos</button>
                         <button onclick="openSubPage('livros', 'webtoon')">Webtoons</button>
                         <button onclick="openSubPage('livros', 'manga')">Mangás</button>
-                        <button onclick="openSubPage('livros', 'yaoiyuri')">BGL</button>
+                        <button onclick="openSubPage('livros', 'BGL')">BGL</button>
                     </div>
                 </div>
 
@@ -83,18 +81,18 @@
                     
                     <div class="status-selector-nav">
                         <button id="btn-status-visto" class="status-nav-btn" onclick="filterStatusView('visto')">Finalizado</button>
-                        <button id="btn-status-naovisto" class="status-nav-btn" onclick="filterStatusView('naovisto')">Um dia!</button>
                         <button id="btn-status-emprocesso" class="status-nav-btn" onclick="filterStatusView('emprocesso')">Em Processo</button>
+                        <button id="btn-status-naovisto" class="status-nav-btn" onclick="filterStatusView('naovisto')">Um dia!</button>
                     </div>
 
                     <div id="status-content-visto" class="status-container-view">
                         <div class="items-grid" id="grid-visto"></div>
                     </div>
-                    <div id="status-content-naovisto" class="status-container-view">
-                        <div class="items-grid" id="grid-naovisto"></div>
-                    </div>
                     <div id="status-content-emprocesso" class="status-container-view">
                         <div class="items-grid" id="grid-emprocesso"></div>
+                    </div>
+                    <div id="status-content-naovisto" class="status-container-view">
+                        <div class="items-grid" id="grid-naovisto"></div>
                     </div>
                 </div>
             </div>
@@ -123,8 +121,8 @@
                 <label for="form-status">Status:</label>
                 <select id="form-status">
                     <option value="visto">Finalizado</option>
-                    <option value="naovisto">Um dia!</option>
                     <option value="emprocesso">Em processo</option>
+                    <option value="naovisto">Um dia!</option>
                 </select>
 
                 <div class="modal-actions">
