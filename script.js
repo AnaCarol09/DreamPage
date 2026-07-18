@@ -1,198 +1,270 @@
-// Estrutura de categorias conforme o seu pedido
+// Configuração das categorias filhas mapeadas com as IDs do seu HTML
 const configData = {
-    "Filmes": { icon: "🎬", cats: ["Animados", "Real-Life", "Doramas", "Animes"] },
-    "Séries": { icon: "📺", cats: ["Desenhos", "Animes", "Novelas", "Real-Life", "Doramas"] },
-    "Livros": { icon: "📖", cats: ["Fisico", "Webtoon", "Mangá", "BGL"] },
-    "Jogos": { icon: "🎮", cats: ["Geralzão"] }
+    "filmes": ["animados", "real", "doramas", "animes"],
+    "series": ["desenhos", "animes", "novelas", "real", "doramas"],
+    "livros": ["fisico", "webtoon", "manga", "bgl"],
+    "jogos": ["geral"]
 };
 
-let currentMainTab = "Filmes";
-let currentCategory = "Animados";
+// Estados globais de navegação interna
+let currentPage = "filmes";
+let currentCategory = "";
+let currentStatusFilter = "visto"; 
+let allTreasures = [];
 
-// Carrega dados salvos ou cria lista vazia localmente
-let treasures = JSON.parse(localStorage.getItem('dreamPageData')) || [];
+// --- Configuração Inicial do Firebase ---
+// Substitua as credenciais abaixo pelas chaves reais obtidas no console do seu Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyBnBN7t588RgDT6pC_u0X7Lwnhh--SimGI",
+    authDomain: "dream-page-c539b.firebaseapp.com",
+    databaseURL: "https://dream-page-c539b-default-rtdb.firebaseio.com",
+    projectId: "dream-page-c539b",
+    storageBucket: "dream-page-c539b.firebasestorage.app",
+    messagingSenderId: "796088572727",
+    appId: "1:796088572727:web:8a568c473e0e14bcb998b2"
+};
 
-// Sistema de Login
+// Inicializa o Firebase (Compat Mode)
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+// --- 1. Autenticação por Palavra-Chave ---
 function checkPassword() {
-    const pass = document.getElementById('password-input').value.trim().toLowerCase();
-    if (pass === 'nostalgia') {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('main-content').style.display = 'block';
-        document.getElementById('fab-add').style.display = 'flex';
-        initDashboard();
+    const passwordInput = document.getElementById("password-input").value.trim().toLowerCase();
+    const errorMsg = document.getElementById("error-msg");
+    const loginScreen = document.getElementById("login-screen");
+    const mainContent = document.getElementById("main-content");
+    const floatingBtn = document.getElementById("add-floating-btn");
+
+    if (passwordInput === "nostalgia") {
+        errorMsg.style.display = "none";
+        loginScreen.style.display = "none";
+        mainContent.style.display = "block";
+        floatingBtn.style.display = "flex";
+        
+        // Escuta e sincroniza dados do Firebase em tempo real
+        listenToFirebase();
     } else {
-        alert('Palavra-chave incorreta!');
+        errorMsg.style.display = "block";
     }
 }
 
-// Permite pressionar Enter no input de Login para submeter
-document.getElementById('password-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') checkPassword();
+// Atalho para Enter no campo de senha
+document.getElementById("password-input").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") checkPassword();
 });
 
-function initDashboard() {
-    switchMainTab(currentMainTab);
+
+// --- 2. Sincronização e Leitura de Dados (Firebase) ---
+function listenToFirebase() {
+    database.ref("treasures").on("value", (snapshot) => {
+        allTreasures = [];
+        const data = snapshot.val();
+        if (data) {
+            Object.keys(data).forEach(key => {
+                allTreasures.push({ id: key, ...data[key] });
+            });
+        }
+        renderGrids();
+    });
 }
 
-function switchMainTab(tabName) {
-    currentMainTab = tabName;
-    currentCategory = configData[tabName].cats[0]; // Seleciona a primeira categoria por defeito
+
+// --- 3. Controle de Navegação Principal e Subpáginas ---
+function switchPage(pageId, element) {
+    // Fecha o modo de visualização de subpágina se estiver aberto
+    document.getElementById("subpage-view").classList.remove("active");
+    document.getElementById("back-btn").style.display = "none";
+
+    // Reseta classes ativas nos botões do menu superior
+    document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+    if (element) element.classList.add("active");
+
+    // Alterna visualização de páginas root
+    document.querySelectorAll(".container .page").forEach(page => {
+        page.classList.remove("active");
+    });
+
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.classList.add("active");
+    }
     
-    // Atualiza botões do menu superior ativo
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent === tabName);
-    });
-
-    // Atualiza Título Visual da Seção
-    document.getElementById('current-tab-title').textContent = `${configData[tabName].icon} ${tabName} - Escolha uma Categoria`;
-
-    renderCategoryButtons();
-    renderItems();
+    currentPage = pageId;
+    currentCategory = ""; 
 }
 
-function renderCategoryButtons() {
-    const container = document.getElementById('category-buttons-container');
-    container.innerHTML = '';
+function openSubPage(pageId, categoryId) {
+    currentPage = pageId;
+    currentCategory = categoryId;
 
-    configData[currentMainTab].cats.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = `category-btn ${cat === currentCategory ? 'active' : ''}`;
-        btn.textContent = cat;
-        btn.onclick = () => {
-            currentCategory = cat;
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderItems();
-        };
-        container.appendChild(btn);
-    });
+    // Esconde páginas principais do fluxo de exibição
+    document.querySelectorAll(".container .page").forEach(page => page.classList.remove("active"));
+
+    // Exibe a tela estrutural das subpáginas
+    const subpageView = document.getElementById("subpage-view");
+    subpageView.classList.add("active");
+
+    // Constrói dinamicamente o título formatado
+    const formattedTitle = `${pageId.toUpperCase()} ➔ ${categoryId.toUpperCase()}`;
+    document.getElementById("subpage-title").textContent = formattedTitle;
+
+    // Ativa o botão de retorno e define o gatilho de clique
+    const backBtn = document.getElementById("back-btn");
+    backBtn.style.display = "inline-block";
+    backBtn.onclick = () => switchPage(pageId, null);
+
+    // Renderiza a navegação de status e reconstrói o Grid de Cards
+    filterStatusView(currentStatusFilter);
 }
 
-function renderItems(filterTitle = "") {
+function filterStatusView(statusId) {
+    currentStatusFilter = statusId;
+
+    // Alterna o estado ativo nos botões de navegação por status
+    document.querySelectorAll(".status-nav-btn").forEach(btn => btn.classList.remove("active"));
+    const activeBtn = document.getElementById(`btn-status-${statusId}`);
+    if (activeBtn) activeBtn.classList.add("active");
+
+    // Alterna a exibição das colunas de conteúdo
+    document.querySelectorAll(".status-container-view").forEach(container => {
+        container.style.display = "none";
+    });
+    const targetContainer = document.getElementById(`status-content-${statusId}`);
+    if (targetContainer) targetContainer.style.display = "block";
+
+    renderGrids();
+}
+
+
+// --- 4. Renderização e Construção de Cards ---
+function renderGrids() {
     const grids = {
-        'nao-visto': document.getElementById('grid-nao-visto'),
-        'em-processo': document.getElementById('grid-em-processo'),
-        'finalizado': document.getElementById('grid-finalizado')
+        visto: document.getElementById("grid-visto"),
+        emprocesso: document.getElementById("grid-emprocesso"),
+        naovisto: document.getElementById("grid-naovisto")
     };
 
-    // Limpa os elementos visuais anteriores das colunas
-    Object.values(grids).forEach(g => g.innerHTML = '');
+    // Limpa os grids visuais
+    Object.values(grids).forEach(grid => { if (grid) grid.innerHTML = ""; });
 
-    treasures.forEach((item, index) => {
-        // Se houver busca por texto, ignora filtro de categoria momentaneamente
-        if (filterTitle) {
-            if (!item.title.toLowerCase().includes(filterTitle.toLowerCase())) return;
-        } else {
-            // Filtro por categoria da aba selecionada
-            if (item.mainTab !== currentMainTab || item.category !== currentCategory) return;
-        }
+    // Se estivermos visualizando uma subpágina específica, filtra por ela
+    const filtered = allTreasures.filter(item => {
+        return item.page === currentPage && item.category === currentCategory;
+    });
 
-        const card = document.createElement('div');
-        card.className = 'item-card';
-        card.id = `item-${index}`;
-        card.innerHTML = `
-            <button class="delete-btn" onclick="deleteItem(${index}, event)">X</button>
-            <img src="${item.cover || 'https://via.placeholder.com/130x180'}" class="item-cover" alt="Capa">
-            <div class="item-info">
-                <a href="${item.link || '#'}" target="_blank" class="item-title" title="${item.title}">${item.title}</a>
-            </div>
-        `;
-
-        if (grids[item.status]) {
-            grids[item.status].appendChild(card);
+    filtered.forEach(item => {
+        const gridTarget = grids[item.status];
+        if (gridTarget) {
+            const card = document.createElement("div");
+            card.className = "item-card";
+            card.innerHTML = `
+                <button class="delete-btn" onclick="deleteItem('${item.id}', event)">X</button>
+                <img src="${item.image || 'https://via.placeholder.com/180x240'}" class="item-image" alt="Capa">
+                <div class="item-info">
+                    <h4 class="item-name">${item.name}</h4>
+                    <a href="${item.link || '#'}" target="_blank" class="item-link">Acessar</a>
+                </div>
+            `;
+            gridTarget.appendChild(card);
         }
     });
 }
 
-// Remover item do baú
-function deleteItem(index, event) {
-    event.stopPropagation();
-    if(confirm("Deseja remover este item do seu baú?")) {
-        treasures.splice(index, 1);
-        localStorage.setItem('dreamPageData', JSON.stringify(treasures));
-        renderItems();
-    }
-}
 
-// Mecanismo Global de Pesquisa (Ao carregar no Enter)
-document.getElementById('search-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        const query = this.value.trim();
-        if(query) {
-            // Varre toda a base de dados
-            const foundItemIndex = treasures.findIndex(item => item.title.toLowerCase().includes(query.toLowerCase()));
-            if (foundItemIndex !== -1) {
-                const item = treasures[foundItemIndex];
-                // Teletransporta o utilizador para a aba e categoria do item
-                switchMainTab(item.mainTab);
-                currentCategory = item.category;
-                renderCategoryButtons();
-                renderItems();
-                
-                // Animação suave para focar o item procurado na página
-                setTimeout(() => {
-                    const element = document.getElementById(`item-${foundItemIndex}`);
-                    if(element) element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 200);
-            } else {
-                alert("Item não encontrado no seu baú!");
-            }
-        } else {
-            renderItems();
-        }
-    }
-});
-
-// Funções de Controlo do Modal (Pop-up)
+// --- 5. Adicionar e Remover Itens ---
 function openModal() {
-    document.getElementById('modal-add').classList.add('active');
-    document.getElementById('form-main-section').value = currentMainTab;
-    updateModalCategories();
+    document.getElementById("item-modal").style.display = "flex";
+    document.getElementById("form-page").value = currentPage;
+    updateFormCategories();
 }
 
 function closeModal() {
-    document.getElementById('modal-add').classList.remove('active');
-    // Limpa os campos para o próximo uso
-    document.getElementById('form-title').value = '';
-    document.getElementById('form-cover').value = '';
-    document.getElementById('form-link').value = '';
+    document.getElementById("item-modal").style.display = "none";
+    document.getElementById("form-name").value = "";
+    document.getElementById("form-image").value = "";
+    document.getElementById("form-link").value = "";
 }
 
-function updateModalCategories() {
-    const selectedMain = document.getElementById('form-main-section').value;
-    const catSelect = document.getElementById('form-category');
-    catSelect.innerHTML = '';
+function updateFormCategories() {
+    const selectedPage = document.getElementById("form-page").value;
+    const categorySelect = document.getElementById("form-category");
+    categorySelect.innerHTML = "";
 
-    configData[selectedMain].cats.forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat;
-        opt.textContent = cat;
-        catSelect.appendChild(opt);
-    });
+    if (configData[selectedPage]) {
+        configData[selectedPage].forEach(cat => {
+            const option = document.createElement("option");
+            option.value = cat;
+            option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+            categorySelect.appendChild(option);
+        });
+    }
 }
 
-function saveNewItem() {
-    const title = document.getElementById('form-title').value.trim();
-    const cover = document.getElementById('form-cover').value.trim();
-    const link = document.getElementById('form-link').value.trim();
-    const mainTab = document.getElementById('form-main-section').value;
-    const category = document.getElementById('form-category').value;
-    const status = document.getElementById('form-status').value;
+function addItem() {
+    const name = document.getElementById("form-name").value.trim();
+    const image = document.getElementById("form-image").value.trim();
+    const link = document.getElementById("form-link").value.trim();
+    const page = document.getElementById("form-page").value;
+    const category = document.getElementById("form-category").value;
+    const status = document.getElementById("form-status").value;
 
-    if (!title) {
-        alert("Por favor, preencha o título do seu tesouro!");
+    if (!name) {
+        alert("O Nome/Título do item é obrigatório!");
         return;
     }
 
-    const newItem = { title, cover, link, mainTab, category, status };
-    treasures.push(newItem);
-    localStorage.setItem('dreamPageData', JSON.stringify(treasures));
+    const newItem = { name, image, link, page, category, status };
 
-    closeModal();
-    
-    // Leva o utilizador à categoria do item adicionado para validação imediata
-    switchMainTab(mainTab);
-    currentCategory = category;
-    renderCategoryButtons();
-    renderItems();
+    // Envia o payload direto para o nó do banco de dados remoto
+    database.ref("treasures").push(newItem)
+        .then(() => {
+            closeModal();
+            openSubPage(page, category);
+            filterStatusView(status);
+        })
+        .catch(err => alert("Erro ao salvar dados: " + err.message));
+}
+
+function deleteItem(itemId, event) {
+    event.stopPropagation(); // Previne comportamentos de cliques fantasmas no card
+    if (confirm("Tem certeza que deseja remover este tesouro do seu baú remoto?")) {
+        database.ref(`treasures/${itemId}`).remove()
+            .catch(err => alert("Erro ao deletar: " + err.message));
+    }
+}
+
+
+// --- 6. Mecanismo de Busca Global com Redirecionamento Autônomo ---
+function filterItems() {
+    // Acoplado ao evento oninput do seu HTML para buscas sob demanda
+    const query = document.getElementById("search-input").value.trim().toLowerCase();
+    if (!query) return;
+
+    // Interceptador para tecla Enter executar o teletransporte
+    document.getElementById("search-input").onkeypress = function(e) {
+        if (e.key === "Enter") {
+            const foundItem = allTreasures.find(item => item.name.toLowerCase().includes(query));
+            if (foundItem) {
+                // Sincroniza os menus superiores visuais ativos
+                const navButtons = document.querySelectorAll(".nav-btn");
+                navButtons.forEach(btn => {
+                    if (btn.textContent.toLowerCase() === foundItem.page.toLowerCase()) {
+                        btn.classList.add("active");
+                    } else {
+                        btn.classList.remove("active");
+                    }
+                });
+
+                // Teletransporta e foca na categoria exata e no status do item achado
+                openSubPage(foundItem.page, foundItem.category);
+                filterStatusView(foundItem.status);
+                
+                // Limpa o campo após a operação de busca ser concluída com sucesso
+                document.getElementById("search-input").value = "";
+            } else {
+                alert("Nenhum item com esse nome foi localizado!");
+            }
+        }
+    };
 }
