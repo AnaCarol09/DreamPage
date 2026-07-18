@@ -1,110 +1,140 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DreamPage</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>DreamPage</title>
+        <link rel="stylesheet" href="geral.css">
+        <link rel="icon" type="image/jpg" href="https://i.pinimg.com/736x/11/81/1e/11811e7369c0da859feb7a3ed87b6f55.jpg">
+    </head>
+    <body>
+        <header>
+            <h1>💫 DreamPage 💫</h1>
+            <p>O portal para as maravilhas desse mundo, um baú com todos os meus tesouros escondidos.</p>
+        </header>
 
-    <header>
-        <div class="logo-container">
-            <span>💫</span> DreamPage <span>💫</span>
-        </div>
-        <div class="subtitle">O portal para as maravilhas desse mundo, um baú com todos os meus tesouros escondidos.</div>
-    </header>
+        <div class="container">
+            
+            <div id="login-screen">
+                <h3>Insira a palavra-chave para acessar</h3>
+                <p class="login-tip">(O sentimento/sensação que mais odeio)</p>
+                <input type="password" id="password-input" placeholder="Palavra-chave...">
+                <button onclick="checkPassword()">Entrar</button>
+                <p id="error-msg">Palavra-chave incorreta. Tente novamente.</p>
+            </div>
 
-    <section id="login-screen">
-        <div class="login-card">
-            <h2>Insira a palavra-chave para acessar</h2>
-            <p>(O sentimento/sensação que mais odeio)</p>
-            <input type="password" id="password-input" class="input-field" placeholder="Palavra-chave...">
-            <br>
-            <button onclick="checkPassword()" class="btn-primary">Entrar</button>
-        </div>
-    </section>
+            <div id="main-content">
 
-    <main id="main-content">
-        <div class="search-container">
-            <input type="text" id="search-input" class="search-bar" placeholder="Pesquisar pelo nome... (Aperte Enter para buscar)">
-        </div>
-
-        <div class="main-tabs">
-            <button class="tab-btn active" onclick="switchMainTab('Filmes')">Filmes</button>
-            <button class="tab-btn" onclick="switchMainTab('Séries')">Séries</button>
-            <button class="tab-btn" onclick="switchMainTab('Livros')">Livros</button>
-            <button class="tab-btn" onclick="switchMainTab('Jogos')">Jogos</button>
-        </div>
-
-        <div class="sub-section">
-            <h3 class="section-title" id="current-tab-title">🎬 Filmes - Escolha uma Categoria</h3>
-            <div class="category-container" id="category-buttons-container">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Pesquisar pelo nome..." oninput="filterItems()">
                 </div>
 
-            <div class="status-wrapper">
-                <div class="status-column">
-                    <h4>Não visto / Não lido / Não jogado</h4>
-                    <div class="items-grid" id="grid-nao-visto"></div>
+                <nav id="main-nav">
+                    <button class="nav-btn active" onclick="switchPage('filmes', this)">Filmes</button>
+                    <button class="nav-btn" onclick="switchPage('series', this)">Séries</button>
+                    <button class="nav-btn" onclick="switchPage('livros', this)">Livros</button>
+                    <button class="nav-btn" onclick="switchPage('jogos', this)">Jogos</button>
+                </nav>
+
+                <button id="back-btn" style="display: none; margin-bottom: 20px;" class="cancel-btn">⬅ Voltar</button>
+
+                <div id="filmes" class="page active">
+                    <h2>🎬 Filmes - Escolha uma Categoria</h2>
+
+                    <div class="menu-categorias">
+                        <button onclick="openSubPage('filmes','animados')">Animados</button>
+                        <button onclick="openSubPage('filmes','real')">Real-Life</button>
+                        <button onclick="openSubPage('filmes','doramas')">Doramas</button>
+                        <button onclick="openSubPage('filmes','animes')">Animes</button>
+                    </div>
                 </div>
-                <div class="status-column">
-                    <h4>Em processo</h4>
-                    <div class="items-grid" id="grid-em-processo"></div>
+
+                <div id="series" class="page">
+                    <h2>📺 Séries - Escolha uma Categoria</h2>
+                    <div class="menu-categorias">
+                        <button onclick="openSubPage('series', 'desenhos')">Desenhos</button>
+                        <button onclick="openSubPage('series', 'animes')">Animes</button>
+                        <button onclick="openSubPage('series', 'novelas')">Novelas</button>
+                        <button onclick="openSubPage('series', 'real')">Real-Life</button>
+                        <button onclick="openSubPage('series', 'doramas')">Doramas</button>
+                    </div>
                 </div>
-                <div class="status-column">
-                    <h4>Finalizado / Visto</h4>
-                    <div class="items-grid" id="grid-finalizado"></div>
+
+                <div id="livros" class="page">
+                    <h2>📖 Livros - Escolha uma Categoria</h2>
+                    <div class="menu-categorias">
+                        <button onclick="openSubPage('livros', 'fisico')">Físicos</button>
+                        <button onclick="openSubPage('livros', 'webtoon')">Webtoons</button>
+                        <button onclick="openSubPage('livros', 'manga')">Mangás</button>
+                        <button onclick="openSubPage('livros', 'bgl')">BGL</button>
+                    </div>
+                </div>
+
+                <div id="jogos" class="page">
+                    <h2>🎮 Jogos - Escolha uma Categoria</h2>
+                    <div class="menu-categorias">
+                        <button onclick="openSubPage('jogos', 'geral')">Geralzão</button>
+                    </div>
+                </div>
+
+                <div id="subpage-view" class="page">
+                    <h2 id="subpage-title">Categoria</h2>
+                    
+                    <div class="status-selector-nav">
+                        <button id="btn-status-visto" class="status-nav-btn" onclick="filterStatusView('visto')">Finalizado</button>
+                        <button id="btn-status-emprocesso" class="status-nav-btn" onclick="filterStatusView('emprocesso')">Em Processo</button>
+                        <button id="btn-status-naovisto" class="status-nav-btn" onclick="filterStatusView('naovisto')">Um dia!</button>
+                    </div>
+
+                    <div id="status-content-visto" class="status-container-view">
+                        <div class="items-grid" id="grid-visto"></div>
+                    </div>
+                    <div id="status-content-emprocesso" class="status-container-view">
+                        <div class="items-grid" id="grid-emprocesso"></div>
+                    </div>
+                    <div id="status-content-naovisto" class="status-container-view">
+                        <div class="items-grid" id="grid-naovisto"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </main>
 
-    <button class="fab-btn" id="fab-add" onclick="openModal()">+</button>
+        <button id="add-floating-btn" onclick="openModal()">+</button>
 
-    <div class="modal-overlay" id="modal-add">
-        <div class="modal-card">
-            <h3>Adicionar Novo Tesouro</h3>
-            <div class="form-group">
-                <label>Nome / Título</label>
-                <input type="text" id="form-title" class="modal-input" placeholder="Ex: Interstellar">
-            </div>
-            <div class="form-group">
-                <label>URL da Imagem de Capa</label>
-                <input type="text" id="form-cover" class="modal-input" placeholder="http://...">
-            </div>
-            <div class="form-group">
-                <label>Link (Onde assistir/ler/jogar)</label>
-                <input type="text" id="form-link" class="modal-input" placeholder="http://...">
-            </div>
-            <div class="form-group">
-                <label>Seção Principal:</label>
-                <select id="form-main-section" class="modal-input" onchange="updateModalCategories()">
-                    <option value="Filmes">Filmes</option>
-                    <option value="Séries">Séries</option>
-                    <option value="Livros">Livros</option>
-                    <option value="Jogos">Jogos</option>
+        <div id="item-modal" class="modal">
+            <div class="modal-content">
+                <h3>Adicionar Novo Tesouro</h3>
+                <input type="text" id="form-name" placeholder="Nome / Título" required>
+                <input type="text" id="form-image" placeholder="URL da Imagem de Capa">
+                <input type="text" id="form-link" placeholder="Link (Onde assistir/ler/jogar)">
+                
+                <label for="form-page">Seção Principal:</label>
+                <select id="form-page" onchange="updateFormCategories()">
+                    <option value="filmes">Filmes</option>
+                    <option value="series">Séries</option>
+                    <option value="livros">Livros</option>
+                    <option value="jogos">Jogos</option>
                 </select>
-            </div>
-            <div class="form-group">
-                <label>Categoria:</label>
-                <select id="form-category" class="modal-input">
-                    </select>
-            </div>
-            <div class="form-group">
-                <label>Status:</label>
-                <select id="form-status" class="modal-input">
-                    <option value="nao-visto">Não Iniciado</option>
-                    <option value="em-processo">Em processo</option>
-                    <option value="finalizado">Finalizado</option>
+
+                <label for="form-category">Categoria:</label>
+                <select id="form-category"></select>
+
+                <label for="form-status">Status:</label>
+                <select id="form-status">
+                    <option value="visto">Finalizado</option>
+                    <option value="emprocesso">Em processo</option>
+                    <option value="naovisto">Um dia!</option>
                 </select>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-                <button class="btn-save" onclick="saveNewItem()">Salvar</button>
+
+                <div class="modal-actions">
+                    <button onclick="closeModal()" class="cancel-btn">Cancelar</button>
+                    <button onclick="addItem()" class="save-btn">Salvar</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script src="script.js"></script>
-</body>
+        <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+        <script src="script.js"></script>
+    </body>
 </html>
