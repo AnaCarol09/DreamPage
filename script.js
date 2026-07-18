@@ -102,7 +102,7 @@ function filterStatusView(status) {
     if (statusBtn) statusBtn.classList.add('active');
 }
 
-/* 4. RENDERIZAR ITENS */
+/* 4. RENDERIZAR ITENS (VERSÃO CORRIGIDA E À PROVA DE FALHAS) */
 function renderItems() {
     // Garante que os elementos existem na tela antes de limpar
     const gridVisto = document.getElementById('grid-visto');
@@ -113,30 +113,46 @@ function renderItems() {
     if (gridNaovisto) gridNaovisto.innerHTML = '';
     if (gridEmprocesso) gridEmprocesso.innerHTML = '';
 
+    // Se não houver uma página ou categoria selecionada no clique, não renderiza as subpáginas
     if (!currentPageContext || !currentCategoryContext) return;
 
     meusItens.forEach(item => {
-        // CORREÇÃO: Verifica se o item possui as propriedades antes de comparar para evitar erros no console
+        // Verifica se as propriedades essenciais existem no item vindo do banco
         if (
-            item.page && item.category &&
-            item.page.toLowerCase() === currentPageContext.toLowerCase() &&
-            item.category.toLowerCase() === currentCategoryContext.toLowerCase()
+            item.page && item.category && item.status && item.name
         ) {
-            const gridContainer = document.getElementById(`grid-${item.status}`);
+            // Força tudo para minúsculas e remove espaços para bater com os contextos
+            const itemPage = item.page.toLowerCase().trim();
+            const itemCategory = item.category.toLowerCase().trim();
+            
+            // Corrige mapeamentos antigos caso o banco tenha salvo textos diferentes
+            let itemStatus = item.status.toLowerCase().trim();
+            if (itemStatus === 'finalizado') itemStatus = 'visto';
+            if (itemStatus === 'em processo') itemStatus = 'emprocesso';
+            if (itemStatus === 'um dia!') itemStatus = 'naovisto';
 
-            if (gridContainer) {
-                const card = document.createElement('div');
-                card.className = 'item-card';
-                card.setAttribute('data-name', item.name.toLowerCase());
-                card.innerHTML = `
-                    <button class="delete-btn" onclick="deleteItem('${item.firebaseKey}')">✕</button>
-                    <img class="item-image" src="${item.image}" alt="Capa">
-                    <div class="item-info">
-                        <p class="item-name">${item.name}</p>
-                        ${item.link ? `<a href="${item.link}" target="_blank" class="item-link">Acessar</a>` : `<span style='font-size:0.8rem; text-align:center; color:gray;'>Sem link</span>`}
-                    </div>
-                `;
-                gridContainer.appendChild(card);
+            if (
+                itemPage === currentPageContext.toLowerCase().trim() &&
+                itemCategory === currentCategoryContext.toLowerCase().trim()
+            ) {
+                // Tenta buscar o grid correspondente (grid-visto, grid-emprocesso ou grid-naovisto)
+                const gridContainer = document.getElementById(`grid-${itemStatus}`);
+
+                // SEGURANÇA: Só insere o card se o container correspondente realmente existir no HTML
+                if (gridContainer) {
+                    const card = document.createElement('div');
+                    card.className = 'item-card';
+                    card.setAttribute('data-name', item.name.toLowerCase());
+                    card.innerHTML = `
+                        <button class="delete-btn" onclick="deleteItem('${item.firebaseKey}')">✕</button>
+                        <img class="item-image" src="${item.image}" alt="Capa">
+                        <div class="item-info">
+                            <p class="item-name">${item.name}</p>
+                            ${item.link ? `<a href="${item.link}" target="_blank" class="item-link">Acessar</a>` : `<span style='font-size:0.8rem; text-align:center; color:gray;'>Sem link</span>`}
+                        </div>
+                    `;
+                    gridContainer.appendChild(card);
+                }
             }
         }
     });
