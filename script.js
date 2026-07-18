@@ -42,15 +42,13 @@ function checkPassword() {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('main-content').style.display = 'block';
         document.getElementById('add-floating-btn').style.display = 'flex';
-        
-        // CORREÇÃO: Força a ativação visual e o contexto da página inicial 'filmes' ao logar
-        switchPage('filmes', document.querySelector('.nav-btn.active'));
+        renderItems();
     } else {
         document.getElementById('error-msg').style.display = 'block';
     }
 }
 
-/* 1. Altera a página principal */
+/* 1. Altera a página principal (CORRIGIDA) */
 function switchPage(pageId, button) {
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -62,13 +60,13 @@ function switchPage(pageId, button) {
     document.getElementById('back-btn').style.display = 'none';
     document.getElementById('main-nav').style.display = 'flex';
 
-    currentPageContext = '';
-    currentCategoryContext = '';
+    // CORREÇÃO: Não limpamos mais os contextos globais aqui para evitar que o fluxo automático de salvamento quebre
     document.getElementById('search-input').value = '';
 }
 
-/* 2. Navegação MANUAL para a página de Categoria específica */
+/* 2. Navegação MANUAL para a página de Categoria específica (CORRIGIDA) */
 function openSubPage(page, category) {
+    // Definimos os contextos ANTES de renderizar
     currentPageContext = page;
     currentCategoryContext = category;
 
@@ -78,8 +76,12 @@ function openSubPage(page, category) {
     
     const backBtn = document.getElementById('back-btn');
     backBtn.style.display = 'inline-block';
+    
+    // Ao voltar manualmente pelo botão, limpamos os contextos para resetar o estado das subpáginas
     backBtn.onclick = function() {
         switchPage(page, document.querySelector(`[onclick*="${page}"]`));
+        currentPageContext = '';
+        currentCategoryContext = '';
     };
 
     document.getElementById('subpage-title').textContent = `${page.toUpperCase()} > ${category.toUpperCase()}`;
@@ -96,8 +98,8 @@ function filterStatusView(status) {
     const statusContent = document.getElementById(`status-content-${status}`);
     const statusBtn = document.getElementById(`btn-status-${status}`);
     
-    if(statusContent) statusContent.style.display = 'block';
-    if(statusBtn) statusBtn.classList.add('active');
+    if (statusContent) statusContent.style.display = 'block';
+    if (statusBtn) statusBtn.classList.add('active');
 }
 
 /* 4. RENDERIZAR ITENS */
@@ -111,11 +113,10 @@ function renderItems() {
     if (gridNaovisto) gridNaovisto.innerHTML = '';
     if (gridEmprocesso) gridEmprocesso.innerHTML = '';
 
-    // Se não houver contexto de página ou categoria selecionado, não continua a renderização das subpáginas
     if (!currentPageContext || !currentCategoryContext) return;
 
     meusItens.forEach(item => {
-        // CORREÇÃO: Adicionada checagem para garantir que as propriedades 'page' e 'category' existem no item do banco
+        // CORREÇÃO: Verifica se o item possui as propriedades antes de comparar para evitar erros no console
         if (
             item.page && item.category &&
             item.page.toLowerCase() === currentPageContext.toLowerCase() &&
@@ -194,10 +195,8 @@ const categoriasPorPagina = {
 function updateFormCategories() {
     const page = document.getElementById('form-page').value;
     const catSelect = document.getElementById('form-category');
-    if(!catSelect) return;
-    
     catSelect.innerHTML = '';
-    if(categoriasPorPagina[page]) {
+    if (categoriasPorPagina[page]) {
         categoriasPorPagina[page].forEach(cat => {
             let opt = document.createElement('option');
             opt.value = cat;
@@ -209,8 +208,8 @@ function updateFormCategories() {
 
 function openModal() {
     document.getElementById('item-modal').style.display = 'flex';
-    // Força a atualização do select de categorias para o valor padrão ('filmes')
-    document.getElementById('form-page').value = 'filmes'; 
+    // CORREÇÃO: Garante o valor padrão inicial ao abrir para popular as categorias dinâmicas corretamente
+    document.getElementById('form-page').value = 'filmes';
     updateFormCategories();
 }
 
@@ -221,13 +220,13 @@ function closeModal() {
     document.getElementById('form-link').value = '';
 }
 
-/* SALVAR NO FIREBASE (CORRIGIDO) */
+/* SALVAR NO FIREBASE (CORRIGIDA E HIGIENIZADA) */
 function addItem() {
     const name = document.getElementById('form-name').value.trim();
     let image = document.getElementById('form-image').value.trim();
     const link = document.getElementById('form-link').value.trim();
     
-    // Força a conversão para minúsculas para alinhar com os filtros de renderização
+    // CORREÇÃO: Força letras minúsculas ao extrair valores do formulário para evitar erros no filtro do renderItems
     const page = document.getElementById('form-page').value.toLowerCase();
     const category = document.getElementById('form-category').value.toLowerCase();
     const status = document.getElementById('form-status').value.toLowerCase();
@@ -235,26 +234,18 @@ function addItem() {
     if (!name) return alert("Por favor, digite um nome!");
     if (!image) image = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400"; 
 
-    const newItem = { 
-        id: Date.now(), 
-        name: name, 
-        image: image, 
-        link: link, 
-        page: page, 
-        category: category, 
-        status: status 
-    };
+    const newItem = { id: Date.now(), name, image, link, page, category, status };
     
     // Envia o item para o Firebase
     database.ref('dreamPageItems').push(newItem);
     
     closeModal();
     
-    // Atualiza o contexto global para a categoria onde o item foi adicionado
+    // Define os contextos globais ativos baseados no novo item criado
     currentPageContext = page;
     currentCategoryContext = category;
     
-    // Abre a subpágina correta e exibe a aba de status do novo item
+    // Abre o ecrã correspondente ao item criado e muda para a aba de status dele
     openSubPage(page, category);
     filterStatusView(status);
 }
@@ -262,21 +253,18 @@ function addItem() {
 /* DELETAR NO FIREBASE */
 function deleteItem(firebaseKey) {
     if(confirm("Tem certeza que deseja apagar este item?")) {
-        // Remove do Firebase usando a chave única do item
         database.ref(`dreamPageItems/${firebaseKey}`).remove();
     }
 }
 
 // Sincronização das Notas de sentimento com o Firebase
 if(document.getElementById('feeling-notes')) {
-    // Busca a nota inicial do banco
     database.ref('dreamPageNotes').once('value').then((snapshot) => {
         if(snapshot.val()) {
             document.getElementById('feeling-notes').value = snapshot.val();
         }
     });
 
-    // Envia as atualizações das notas para o Firebase conforme digita
     document.getElementById('feeling-notes').addEventListener('input', (e) => {
         database.ref('dreamPageNotes').set(e.target.value);
     });
@@ -285,4 +273,4 @@ if(document.getElementById('feeling-notes')) {
 document.getElementById('password-input').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') checkPassword();
 });
-// CORREÇÃO: Removida a chave "}" extra que existia aqui e quebrava a leitura do arquivo inteiro.
+// A CHAVE EXTRA QUE CAUSAVA O ERRO FOI APAGADA DAQUI!
