@@ -267,7 +267,7 @@ h1 {
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 4px 20px rgba(0, 255, 204, 0.4);
-    display: none; /* Ativado via JS pós-login */
+    display: none;
     align-items: center;
     justify-content: center;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -391,7 +391,7 @@ h1 {
     box-shadow: 0 0 15px var(--accent-color);
 }
 
-/* Navegação por Abas de Status (Finalizado, Em processo, etc) */
+/* Navegação por Abas de Status */
 .status-selector-nav {
     display: flex;
     gap: 10px;
@@ -411,7 +411,6 @@ h1 {
     transition: all 0.2s ease;
 }
 
-/* CORREÇÃO 2: Estilização explícita para quando a aba de status estiver ATIVA */
 .status-nav-btn.active {
     background: var(--success-color);
     color: var(--bg-color);
@@ -420,7 +419,6 @@ h1 {
     box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
 }
 
-/* CORREÇÃO 1: Controla os contêineres de visibilidade das subpáginas */
 .status-container-view {
     display: none;
     width: 100%;
