@@ -14,15 +14,15 @@ let allTreasures = [];
 
 // --- Configuração Inicial do Firebase ---
 // Substitua as credenciais abaixo pelas chaves reais obtidas no console do seu Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyBnBN7t588RgDT6pC_u0X7Lwnhh--SimGI",
-    authDomain: "dream-page-c539b.firebaseapp.com",
-    databaseURL: "https://dream-page-c539b-default-rtdb.firebaseio.com",
-    projectId: "dream-page-c539b",
-    storageBucket: "dream-page-c539b.firebasestorage.app",
-    messagingSenderId: "796088572727",
-    appId: "1:796088572727:web:8a568c473e0e14bcb998b2"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyDll77grW7wwWs_ZGhpPKdJcFHjZH1LUe4",
+    authDomain: "dream-page-c0436.firebaseapp.com",
+    projectId: "dream-page-c0436",
+    storageBucket: "dream-page-c0436.firebasestorage.app",
+    messagingSenderId: "546123701437",
+    appId: "1:546123701437:web:4f6817ca23248b384e6bd4",
+    measurementId: "G-Y80W54XGRZ"
+  };
 
 // Inicializa o Firebase (Compat Mode)
 firebase.initializeApp(firebaseConfig);
