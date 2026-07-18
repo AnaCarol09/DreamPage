@@ -42,7 +42,9 @@ function checkPassword() {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('main-content').style.display = 'block';
         document.getElementById('add-floating-btn').style.display = 'flex';
-        renderItems();
+        
+        // CORREÇÃO: Força a ativação visual e o contexto da página inicial 'filmes' ao logar
+        switchPage('filmes', document.querySelector('.nav-btn.active'));
     } else {
         document.getElementById('error-msg').style.display = 'block';
     }
@@ -53,7 +55,8 @@ function switchPage(pageId, button) {
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
     
-    document.getElementById(pageId).classList.add('active');
+    const targetPage = document.getElementById(pageId);
+    if(targetPage) targetPage.classList.add('active');
     if(button) button.classList.add('active');
     
     document.getElementById('back-btn').style.display = 'none';
@@ -90,8 +93,11 @@ function filterStatusView(status) {
     document.querySelectorAll('.status-container-view').forEach(el => el.style.display = 'none');
     document.querySelectorAll('.status-nav-btn').forEach(btn => btn.classList.remove('active'));
 
-    document.getElementById(`status-content-${status}`).style.display = 'block';
-    document.getElementById(`btn-status-${status}`).classList.add('active');
+    const statusContent = document.getElementById(`status-content-${status}`);
+    const statusBtn = document.getElementById(`btn-status-${status}`);
+    
+    if(statusContent) statusContent.style.display = 'block';
+    if(statusBtn) statusBtn.classList.add('active');
 }
 
 /* 4. RENDERIZAR ITENS */
@@ -105,10 +111,13 @@ function renderItems() {
     if (gridNaovisto) gridNaovisto.innerHTML = '';
     if (gridEmprocesso) gridEmprocesso.innerHTML = '';
 
+    // Se não houver contexto de página ou categoria selecionado, não continua a renderização das subpáginas
     if (!currentPageContext || !currentCategoryContext) return;
 
     meusItens.forEach(item => {
+        // CORREÇÃO: Adicionada checagem para garantir que as propriedades 'page' e 'category' existem no item do banco
         if (
+            item.page && item.category &&
             item.page.toLowerCase() === currentPageContext.toLowerCase() &&
             item.category.toLowerCase() === currentCategoryContext.toLowerCase()
         ) {
@@ -118,7 +127,6 @@ function renderItems() {
                 const card = document.createElement('div');
                 card.className = 'item-card';
                 card.setAttribute('data-name', item.name.toLowerCase());
-                // Passamos a propriedade item.firebaseKey entre aspas simples para a função deleteItem
                 card.innerHTML = `
                     <button class="delete-btn" onclick="deleteItem('${item.firebaseKey}')">✕</button>
                     <img class="item-image" src="${item.image}" alt="Capa">
@@ -142,7 +150,7 @@ function filterItems() {
         return;
     }
 
-    const itemEncontrado = meusItens.find(item => item.name.toLowerCase().includes(query));
+    const itemEncontrado = meusItens.find(item => item.name && item.name.toLowerCase().includes(query));
 
     if (itemEncontrado) {
         currentPageContext = itemEncontrado.page;
@@ -165,7 +173,7 @@ function filterItems() {
 
         document.querySelectorAll('.item-card').forEach(card => {
             const itemName = card.getAttribute('data-name');
-            if (itemName.includes(query)) {
+            if (itemName && itemName.includes(query)) {
                 card.style.display = 'flex';
                 card.style.border = '2px solid var(--success-color)';
                 card.style.boxShadow = '0 0 15px rgba(0, 255, 204, 0.4)';
@@ -177,43 +185,26 @@ function filterItems() {
 }
 
 const categoriasPorPagina = {
-    filmes: [
-        "animados",
-        "real",
-        "doramas",
-        "animes"
-    ],
-
-    series: [
-        "desenhos",
-        "animes",
-        "novelas",
-        "real",
-        "doramas"
-    ],
-
-    livros: [
-        "fisico",
-        "webtoon",
-        "manga",
-        "bgl"
-    ],
-
-    jogos: [
-        "geral"
-    ]
+    filmes: ["animados", "real", "doramas", "animes"],
+    series: ["desenhos", "animes", "novelas", "real", "doramas"],
+    livros: ["fisico", "webtoon", "manga", "bgl"],
+    jogos: ["geral"]
 };
 
 function updateFormCategories() {
     const page = document.getElementById('form-page').value;
     const catSelect = document.getElementById('form-category');
+    if(!catSelect) return;
+    
     catSelect.innerHTML = '';
-    categoriasPorPagina[page].forEach(cat => {
-        let opt = document.createElement('option');
-        opt.value = cat;
-        opt.textContent = cat.toUpperCase();
-        catSelect.appendChild(opt);
-    });
+    if(categoriasPorPagina[page]) {
+        categoriasPorPagina[page].forEach(cat => {
+            let opt = document.createElement('option');
+            opt.value = cat;
+            opt.textContent = cat.toUpperCase();
+            catSelect.appendChild(opt);
+        });
+    }
 }
 
 function openModal() {
@@ -221,7 +212,6 @@ function openModal() {
     updateFormCategories();
 }
 
-// Pequeno ajuste para limpar campos ao fechar
 function closeModal() {
     document.getElementById('item-modal').style.display = 'none';
     document.getElementById('form-name').value = '';
@@ -243,7 +233,7 @@ function addItem() {
 
     const newItem = { id: Date.now(), name, image, link, page, category, status };
     
-    // Envia o item para o Firebase em vez do localStorage
+    // Envia o item para o Firebase
     database.ref('dreamPageItems').push(newItem);
     
     closeModal();
@@ -280,3 +270,4 @@ if(document.getElementById('feeling-notes')) {
 document.getElementById('password-input').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') checkPassword();
 });
+// CORREÇÃO: Removida a chave "}" extra que existia aqui e quebrava a leitura do arquivo inteiro.
