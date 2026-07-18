@@ -209,6 +209,8 @@ function updateFormCategories() {
 
 function openModal() {
     document.getElementById('item-modal').style.display = 'flex';
+    // Força a atualização do select de categorias para o valor padrão ('filmes')
+    document.getElementById('form-page').value = 'filmes'; 
     updateFormCategories();
 }
 
@@ -219,27 +221,40 @@ function closeModal() {
     document.getElementById('form-link').value = '';
 }
 
-/* SALVAR NO FIREBASE */
+/* SALVAR NO FIREBASE (CORRIGIDO) */
 function addItem() {
     const name = document.getElementById('form-name').value.trim();
     let image = document.getElementById('form-image').value.trim();
     const link = document.getElementById('form-link').value.trim();
-    const page = document.getElementById('form-page').value;
-    const category = document.getElementById('form-category').value;
-    const status = document.getElementById('form-status').value;
+    
+    // Força a conversão para minúsculas para alinhar com os filtros de renderização
+    const page = document.getElementById('form-page').value.toLowerCase();
+    const category = document.getElementById('form-category').value.toLowerCase();
+    const status = document.getElementById('form-status').value.toLowerCase();
 
     if (!name) return alert("Por favor, digite um nome!");
     if (!image) image = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400"; 
 
-    const newItem = { id: Date.now(), name, image, link, page, category, status };
+    const newItem = { 
+        id: Date.now(), 
+        name: name, 
+        image: image, 
+        link: link, 
+        page: page, 
+        category: category, 
+        status: status 
+    };
     
     // Envia o item para o Firebase
     database.ref('dreamPageItems').push(newItem);
     
     closeModal();
     
+    // Atualiza o contexto global para a categoria onde o item foi adicionado
     currentPageContext = page;
     currentCategoryContext = category;
+    
+    // Abre a subpágina correta e exibe a aba de status do novo item
     openSubPage(page, category);
     filterStatusView(status);
 }
