@@ -26,7 +26,12 @@
             <div id="main-content">
 
                 <div class="search-container">
-                    <input type="text" id="search-input" placeholder="Pesquisar pelo nome..." oninput="filterItems()">
+                    <input type="text" id="search-input" placeholder="Pesquisar pelo nome e aperte Enter..." oninput="filterItems()">
+                </div>
+
+                <div id="search-results-view" class="page" style="display: none;">
+                    <h2>🔍 Resultados da Busca</h2>
+                    <div class="items-grid" id="grid-search-results"></div>
                 </div>
 
                 <nav id="main-nav">
@@ -40,7 +45,6 @@
 
                 <div id="filmes" class="page active">
                     <h2>🎬 Filmes - Escolha uma Categoria</h2>
-
                     <div class="menu-categorias">
                         <button onclick="openSubPage('filmes','animados')">Animados</button>
                         <button onclick="openSubPage('filmes','real')">Real-Life</button>
