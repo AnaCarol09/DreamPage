@@ -9,12 +9,16 @@ const configData = {
 // Estados globais de navegação interna
 let currentPage = "filmes";
 let currentCategory = "";
-let currentStatusFilter = "visto"; 
+let currentStatusFilter = "visto";
 let allTreasures = [];
+
+let lastPage = "";
+let lastCategory = "";
+let lastStatus = "";
 
 // --- Configuração Inicial do Firebase ---
 // Substitua as credenciais abaixo pelas chaves reais obtidas no console do seu Firebase
-  const firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyDll77grW7wwWs_ZGhpPKdJcFHjZH1LUe4",
     authDomain: "dream-page-c0436.firebaseapp.com",
     projectId: "dream-page-c0436",
@@ -22,7 +26,7 @@ let allTreasures = [];
     messagingSenderId: "546123701437",
     appId: "1:546123701437:web:4f6817ca23248b384e6bd4",
     measurementId: "G-Y80W54XGRZ"
-  };
+};
 
 // Inicializa o Firebase (Compat Mode)
 firebase.initializeApp(firebaseConfig);
@@ -91,7 +95,7 @@ function switchPage(pageId, element) {
     }
     
     currentPage = pageId;
-    currentCategory = ""; 
+    currentCategory = "";
 }
 
 function openSubPage(pageId, categoryId) {
@@ -237,34 +241,119 @@ function deleteItem(itemId, event) {
 
 // --- 6. Mecanismo de Busca Global com Redirecionamento Autônomo ---
 function filterItems() {
-    // Acoplado ao evento oninput do seu HTML para buscas sob demanda
-    const query = document.getElementById("search-input").value.trim().toLowerCase();
-    if (!query) return;
 
-    // Interceptador para tecla Enter executar o teletransporte
-    document.getElementById("search-input").onkeypress = function(e) {
-        if (e.key === "Enter") {
-            const foundItem = allTreasures.find(item => item.name.toLowerCase().includes(query));
-            if (foundItem) {
-                // Sincroniza os menus superiores visuais ativos
-                const navButtons = document.querySelectorAll(".nav-btn");
-                navButtons.forEach(btn => {
-                    if (btn.textContent.toLowerCase() === foundItem.page.toLowerCase()) {
-                        btn.classList.add("active");
-                    } else {
-                        btn.classList.remove("active");
-                    }
-                });
+    const input = document.getElementById("search-input");
 
-                // Teletransporta e foca na categoria exata e no status do item achado
-                openSubPage(foundItem.page, foundItem.category);
-                filterStatusView(foundItem.status);
-                
-                // Limpa o campo após a operação de busca ser concluída com sucesso
-                document.getElementById("search-input").value = "";
-            } else {
-                alert("Nenhum item com esse nome foi localizado!");
-            }
+    input.onkeypress = function(e){
+
+        if(e.key !== "Enter") return;
+
+        const query = input.value.trim().toLowerCase();
+
+        if(query === "") return;
+
+        const results = allTreasures.filter(item =>
+            item.name.toLowerCase().includes(query)
+        );
+
+        if(results.length === 0){
+            alert("Nenhum item encontrado.");
+            return;
         }
+
+        // Salva onde o usuário estava
+        lastPage = currentPage;
+        lastCategory = currentCategory;
+        lastStatus = currentStatusFilter;
+
+        // Esconde somente as páginas principais
+        document.querySelectorAll(".container .page").forEach(page=>{
+            page.classList.remove("active");
+            page.style.display="none";
+        });
+
+        const searchPage = document.getElementById("search-results-view");
+        searchPage.style.display="block";
+        searchPage.classList.add("active");
+
+        const grid = document.getElementById("grid-search-results");
+        grid.innerHTML="";
+
+        const statusNome = {
+            visto:"Finalizado",
+            emprocesso:"Em Processo",
+            naovisto:"Um dia!"
+        };
+
+        results.forEach(item=>{
+
+            const card=document.createElement("div");
+            card.className="item-card";
+
+            card.innerHTML=`
+
+                <img src="${item.image || 'https://via.placeholder.com/180x240'}" class="item-image">
+
+                <div class="item-info">
+
+                    <h4 class="item-name">${item.name}</h4>
+
+                    <a class="item-link"
+                    href="${item.link || '#'}"
+                    target="_blank">
+                    Acessar
+                    </a>
+
+                </div>
+
+                <div class="item-tooltip">
+
+                    📂 ${item.page.toUpperCase()} <br>
+
+                    📁 ${item.category.toUpperCase()} <br>
+
+                    ⭐ ${statusNome[item.status]}
+
+                </div>
+
+            `;
+
+            grid.appendChild(card);
+
+        });
+
+        input.value="";
+
     };
+
+}
+
+function closeSearch(){
+
+    const searchPage = document.getElementById("search-results-view");
+
+    searchPage.style.display="none";
+    searchPage.classList.remove("active");
+
+    // Mostra novamente todas as páginas
+    document.querySelectorAll(".container .page").forEach(page=>{
+        page.style.display="";
+    });
+
+    // Se estava em uma categoria
+    if(lastCategory !== ""){
+
+        openSubPage(lastPage,lastCategory);
+        filterStatusView(lastStatus);
+
+    }
+    else{
+
+        const btn=[...document.querySelectorAll(".nav-btn")]
+        .find(btn=>btn.textContent.toLowerCase()===lastPage);
+
+        switchPage(lastPage,btn);
+
+    }
+
 }
