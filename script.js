@@ -13,7 +13,8 @@ let currentStatusFilter = "visto";
 let allTreasures = [];
 
 // --- Configuração Inicial do Firebase ---
-const firebaseConfig = {
+// Substitua as credenciais abaixo pelas chaves reais obtidas no console do seu Firebase
+  const firebaseConfig = {
     apiKey: "AIzaSyDll77grW7wwWs_ZGhpPKdJcFHjZH1LUe4",
     authDomain: "dream-page-c0436.firebaseapp.com",
     projectId: "dream-page-c0436",
@@ -21,13 +22,13 @@ const firebaseConfig = {
     messagingSenderId: "546123701437",
     appId: "1:546123701437:web:4f6817ca23248b384e6bd4",
     measurementId: "G-Y80W54XGRZ"
-};
+  };
 
 // Inicializa o Firebase (Compat Mode)
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// --- 1.Autenticação por Palavra-Chave ---
+// --- 1. Autenticação por Palavra-Chave ---
 function checkPassword() {
     const passwordInput = document.getElementById("password-input").value.trim().toLowerCase();
     const errorMsg = document.getElementById("error-msg");
@@ -65,28 +66,12 @@ function listenToFirebase() {
             });
         }
         renderGrids();
-        
-        // Atualiza a busca em tempo real se a tela de busca estiver aberta
-        const searchView = document.getElementById("search-results-view");
-        if (searchView && searchView.style.display === "block") {
-            executeSearch();
-        }
     });
 }
 
 
 // --- 3. Controle de Navegação Principal e Subpáginas ---
-function restorePageDisplays() {
-    // Restaura o display original das páginas escondidas pela busca
-    document.querySelectorAll(".container .page").forEach(page => {
-        page.style.display = "";
-    });
-    document.getElementById("search-results-view").style.display = "none";
-}
-
 function switchPage(pageId, element) {
-    restorePageDisplays();
-
     // Fecha o modo de visualização de subpágina se estiver aberto
     document.getElementById("subpage-view").classList.remove("active");
     document.getElementById("back-btn").style.display = "none";
@@ -107,13 +92,9 @@ function switchPage(pageId, element) {
     
     currentPage = pageId;
     currentCategory = ""; 
-    
-    // Limpa a barra de busca ao trocar de aba principal
-    document.getElementById("search-input").value = "";
 }
 
 function openSubPage(pageId, categoryId) {
-    restorePageDisplays();
     currentPage = pageId;
     currentCategory = categoryId;
 
@@ -254,72 +235,36 @@ function deleteItem(itemId, event) {
 }
 
 
-// --- 6. Mecanismo de Busca Global com Exibição Separada ---
-function executeSearch() {
+// --- 6. Mecanismo de Busca Global com Redirecionamento Autônomo ---
+function filterItems() {
+    // Acoplado ao evento oninput do seu HTML para buscas sob demanda
     const query = document.getElementById("search-input").value.trim().toLowerCase();
-    const searchResultsView = document.getElementById("search-results-view");
-    const gridSearchResults = document.getElementById("grid-search-results");
-
     if (!query) return;
 
-    // Esconde todas as outras páginas visíveis
-    document.querySelectorAll(".container .page").forEach(page => {
-        page.classList.remove("active");
-        page.style.display = "none";
-    });
-
-    // Limpa o grid de busca
-    gridSearchResults.innerHTML = "";
-
-    // Filtra os itens pelo nome
-    const results = allTreasures.filter(item => 
-        item.name.toLowerCase().includes(query)
-    );
-
-    if (results.length > 0) {
-        // Renderiza os cards na seção isolada de busca
-        results.forEach(item => {
-            const card = document.createElement("div");
-            card.className = "item-card";
-            card.innerHTML = `
-                <button class="delete-btn" onclick="deleteItem('${item.id}', event)">X</button>
-                <img src="${item.image || 'https://via.placeholder.com/180x240'}" class="item-image" alt="Capa">
-                <div class="item-info">
-                    <h4 class="item-name">${item.name}</h4>
-                    <p style="font-size:0.75rem; color: var(--text-secondary); text-align:center; margin: 0 0 8px 0;">
-                        ${item.page.toUpperCase()} ➔ ${item.category.toUpperCase()} (${item.status.toUpperCase()})
-                    </p>
-                    <a href="${item.link || '#'}" target="_blank" class="item-link">Acessar</a>
-                </div>
-            `;
-            gridSearchResults.appendChild(card);
-        });
-    } else {
-        gridSearchResults.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">Nenhum tesouro encontrado com esse nome.</p>`;
-    }
-
-    // Exibe a tela de busca isolada
-    searchResultsView.style.display = "block";
-}
-
-function filterItems() {
-    const query = document.getElementById("search-input").value.trim().toLowerCase();
-    const searchResultsView = document.getElementById("search-results-view");
-
-    // Se o campo estiver limpo, restaura a exibição anterior
-    if (!query) {
-        restorePageDisplays();
-        document.getElementById(currentPage).classList.add("active");
-        if (currentCategory) {
-            document.getElementById("subpage-view").classList.add("active");
-        }
-        return;
-    }
-
-    // Pressionar Enter realiza a busca isolada
+    // Interceptador para tecla Enter executar o teletransporte
     document.getElementById("search-input").onkeypress = function(e) {
         if (e.key === "Enter") {
-            executeSearch();
+            const foundItem = allTreasures.find(item => item.name.toLowerCase().includes(query));
+            if (foundItem) {
+                // Sincroniza os menus superiores visuais ativos
+                const navButtons = document.querySelectorAll(".nav-btn");
+                navButtons.forEach(btn => {
+                    if (btn.textContent.toLowerCase() === foundItem.page.toLowerCase()) {
+                        btn.classList.add("active");
+                    } else {
+                        btn.classList.remove("active");
+                    }
+                });
+
+                // Teletransporta e foca na categoria exata e no status do item achado
+                openSubPage(foundItem.page, foundItem.category);
+                filterStatusView(foundItem.status);
+                
+                // Limpa o campo após a operação de busca ser concluída com sucesso
+                document.getElementById("search-input").value = "";
+            } else {
+                alert("Nenhum item com esse nome foi localizado!");
+            }
         }
     };
 }
