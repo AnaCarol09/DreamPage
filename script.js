@@ -27,7 +27,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// --- 1. Autenticação por Palavra-Chave ---
+// --- 1.Autenticação por Palavra-Chave ---
 function checkPassword() {
     const passwordInput = document.getElementById("password-input").value.trim().toLowerCase();
     const errorMsg = document.getElementById("error-msg");
