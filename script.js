@@ -1,4 +1,4 @@
-// Configuração das categorias filhas mapeadas com as IDs do seu HTML
+// Mapeamento das subcategorias filhas de cada seção principal
 const configData = {
     "filmes": ["animados", "real", "doramas", "animes"],
     "series": ["desenhos", "animes", "novelas", "real", "doramas"],
@@ -6,7 +6,7 @@ const configData = {
     "jogos": ["geral"]
 };
 
-// Estados globais de navegação interna
+// Variáveis globais para controlar a navegação e armazenar os dados carregados
 let currentPage = "filmes";
 let currentCategory = "";
 let currentStatusFilter = "visto";
@@ -16,10 +16,10 @@ let lastPage = "";
 let lastCategory = "";
 let lastStatus = "";
 
-// Variável para armazenar o ID do item em edição (null quando for criar novo)
+// Guarda o ID ao editar um item existente; permanece null para novos cadastros
 let editingItemId = null;
 
-// --- Configuração Inicial do Firebase ---
+// Configuração de conexão do Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyDll77grW7wwWs_ZGhpPKdJcFHjZH1LUe4",
     authDomain: "dream-page-c0436.firebaseapp.com",
@@ -30,11 +30,11 @@ const firebaseConfig = {
     measurementId: "G-Y80W54XGRZ"
 };
 
-// Inicializa o Firebase (Compat Mode)
+// Inicialização da instância do banco de dados do Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// --- 1. Autenticação por Palavra-Chave ---
+// --- 1. Autenticação Simples ---
 function checkPassword() {
     const passwordInput = document.getElementById("password-input").value.trim().toLowerCase();
     const errorMsg = document.getElementById("error-msg");
@@ -42,27 +42,28 @@ function checkPassword() {
     const mainContent = document.getElementById("main-content");
     const floatingBtn = document.getElementById("add-floating-btn");
 
+    // Valida a palavra-chave para revelar a interface principal e iniciar o Firebase
     if (passwordInput === "nostalgia") {
         errorMsg.style.display = "none";
         loginScreen.style.display = "none";
         mainContent.style.display = "block";
         floatingBtn.style.display = "flex";
         
-        // Escuta e sincroniza dados do Firebase em tempo real
+        // Ativa a escuta de dados em tempo real no banco
         listenToFirebase();
     } else {
         errorMsg.style.display = "block";
     }
 }
 
-// Atalho para Enter no campo de senha
 document.getElementById("password-input").addEventListener("keypress", function(e) {
     if (e.key === "Enter") checkPassword();
 });
 
 
-// --- 2. Sincronização e Leitura de Dados (Firebase) ---
+// --- 2. Sincronização em Tempo Real (Firebase) ---
 function listenToFirebase() {
+    // Sincroniza qualquer alteração no nó 'treasures' do Firebase com a lista local
     database.ref("treasures").on("value", (snapshot) => {
         allTreasures = [];
         const data = snapshot.val();
@@ -76,7 +77,7 @@ function listenToFirebase() {
 }
 
 
-// --- 3. Controle de Navegação Principal e Subpáginas ---
+// --- 3. Controle de Telas e Navegação ---
 function switchPage(pageId, element) {
     document.getElementById("subpage-view").classList.remove("active");
     document.getElementById("back-btn").style.display = "none";
@@ -133,7 +134,7 @@ function filterStatusView(statusId) {
 }
 
 
-// --- 4. Renderização e Construção de Cards ---
+// --- 4. Renderização do Grid e Ordenação ---
 function renderGrids() {
     const grids = {
         visto: document.getElementById("grid-visto"),
@@ -143,10 +144,12 @@ function renderGrids() {
 
     Object.values(grids).forEach(grid => { if (grid) grid.innerHTML = ""; });
 
+    // Filtra apenas os itens pertencentes à página e categoria ativas
     const filtered = allTreasures.filter(item => {
         return item.page === currentPage && item.category === currentCategory;
     });
 
+    // Ordenação alfabética ignorando acentuação e maiúsculas/minúsculas
     filtered.sort((a, b) => (a.name || "").localeCompare(b.name || "", 'pt-BR', { sensitivity: 'base' }));
 
     filtered.forEach(item => {
@@ -155,7 +158,7 @@ function renderGrids() {
             const card = document.createElement("div");
             card.className = "item-card";
             
-            // Exibe apenas o ícone de balão se existir comentário
+            // Exibe o emoji indicador caso o item possua anotações
             const commentHTML = (item.comment && item.comment.trim() !== "")
                 ? `<span class="item-comment-icon" title="${item.comment}">💬</span>`
                 : '';
@@ -179,10 +182,8 @@ function renderGrids() {
 
 
 // --- 5. Adicionar, Editar e Remover Itens ---
-
-// Modal para criar novo item
 function openModal() {
-    editingItemId = null;
+    editingItemId = null; // Reinicia para criação
     document.getElementById("modal-title").textContent = "Adicionar Novo Tesouro";
     document.getElementById("item-modal").style.display = "flex";
     document.getElementById("form-page").value = currentPage;
@@ -190,12 +191,12 @@ function openModal() {
     updateFormCategories();
 }
 
-// Modal para editar item existente ao dar duplo clique na imagem
+// Preenche o modal com dados prévios para edição
 function openEditModal(itemId) {
     const item = allTreasures.find(i => i.id === itemId);
     if (!item) return;
 
-    editingItemId = itemId;
+    editingItemId = itemId; // Salva o ID em edição
     document.getElementById("modal-title").textContent = "Editar Tesouro";
 
     document.getElementById("form-name").value = item.name || "";
@@ -221,6 +222,7 @@ function closeModal() {
     document.getElementById("form-comment").value = "";
 }
 
+// Atualiza o select de subcategorias com base na seção escolhida
 function updateFormCategories() {
     const selectedPage = document.getElementById("form-page").value;
     const categorySelect = document.getElementById("form-category");
@@ -236,6 +238,7 @@ function updateFormCategories() {
     }
 }
 
+// Envia os dados para salvar ou atualizar no banco do Firebase
 function addItem() {
     const name = document.getElementById("form-name").value.trim();
     const image = document.getElementById("form-image").value.trim();
@@ -253,6 +256,7 @@ function addItem() {
     const itemData = { name, image, link, comment, page, category, status };
 
     if (editingItemId) {
+        // Atualiza item existente
         database.ref(`treasures/${editingItemId}`).update(itemData)
             .then(() => {
                 closeModal();
@@ -261,6 +265,7 @@ function addItem() {
             })
             .catch(err => alert("Erro ao atualizar dados: " + err.message));
     } else {
+        // Cria um novo item
         database.ref("treasures").push(itemData)
             .then(() => {
                 closeModal();
@@ -280,24 +285,24 @@ function deleteItem(itemId, event) {
 }
 
 
-// --- 6. Mecanismo de Busca Global com Redirecionamento Autônomo em Tempo Real ---
+// --- 6. Pesquisa em Tempo Real e Normalização de Texto ---
 function filterItems() {
     const input = document.getElementById("search-input");
     const rawQuery = input.value.trim();
 
-    // Se o campo estiver vazio, fecha a tela de busca automaticamente e restaura a visualização
+    // Restaura a visualização anterior se o campo for limpo
     if (rawQuery === "") {
         closeSearch();
         return;
     }
 
-    // Normaliza o texto removendo acentos e convertendo para minúsculas
+    // Normalização para ignorar acentuação e cedilha
     const query = rawQuery
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase();
 
-    // Filtra os itens sem travar a interface
+    // Busca no array de dados tratando acentos do texto cadastrado
     const results = allTreasures.filter(item => {
         const normalizedName = (item.name || "")
             .normalize("NFD")
@@ -307,7 +312,7 @@ function filterItems() {
         return normalizedName.includes(query);
     });
 
-    // Salva o estado atual apenas se ainda não estiver na busca
+    // Salva o histórico de navegação ao entrar no modo de pesquisa
     const searchPage = document.getElementById("search-results-view");
     if (!searchPage.classList.contains("active")) {
         lastPage = currentPage;
@@ -315,7 +320,7 @@ function filterItems() {
         lastStatus = currentStatusFilter;
     }
 
-    // Esconde as páginas principais sem remover a digitação
+    // Oculta a navegação secundária para focar nos resultados
     document.querySelectorAll(".container .page").forEach(page => {
         page.classList.remove("active");
         page.style.display = "none";
@@ -324,7 +329,6 @@ function filterItems() {
     document.getElementById("main-nav").style.display = "none";
     document.getElementById("back-btn").style.display = "none";
 
-    // Exibe a tela de resultados
     searchPage.style.display = "block";
     searchPage.classList.add("active");
 
@@ -348,15 +352,15 @@ function filterItems() {
         const card = document.createElement("div");
         card.className = "item-card";
 
-        const commentHTML = (item.comment && item.comment.trim() !== "") 
-            ? `<span class="item-comment-icon" title="${item.comment}">💬</span>` 
+        const commentHTML = (item.comment && item.comment.trim() !== "")
+            ? `<span class="item-comment-icon" title="${item.comment}">💬</span>`
             : '';
 
         card.innerHTML = `
-            <img src="${item.image || 'https://via.placeholder.com/180x240'}" 
-                 class="item-image" 
-                 title="Clique duas vezes para editar" 
-                 ondblclick="openEditModal('${item.id}')">
+            <img src="${item.image || 'https://via.placeholder.com/180x240'}"
+                class="item-image"
+                title="Clique duas vezes para editar"
+                ondblclick="openEditModal('${item.id}')">
             <div class="item-info">
                 <h4 class="item-name">${item.name} ${commentHTML}</h4>
                 <a class="item-link" href="${item.link || '#'}" target="_blank">Acessar</a>
@@ -371,12 +375,12 @@ function filterItems() {
     });
 }
 
+// Fecha a tela de busca e restaura o menu de navegação e categoria anteriores
 function closeSearch(){
     const searchPage = document.getElementById("search-results-view");
     searchPage.style.display="none";
     searchPage.classList.remove("active");
 
-    // Restaura a exibição do menu de navegação
     document.getElementById("main-nav").style.display = "flex";
 
     document.querySelectorAll(".container .page").forEach(page=>{

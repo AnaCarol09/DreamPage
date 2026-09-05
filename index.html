@@ -15,6 +15,7 @@
 
         <div class="container">
             
+            <!-- Tela de Autenticação Inicial -->
             <div id="login-screen">
                 <h3>Insira a palavra-chave para acessar</h3>
                 <p class="login-tip">(O sentimento/sensação que mais odeio)</p>
@@ -23,12 +24,15 @@
                 <p id="error-msg">Palavra-chave incorreta. Tente novamente.</p>
             </div>
 
+            <!-- Conteúdo Principal (Oculto até autenticar) -->
             <div id="main-content">
 
+                <!-- Barra de Pesquisa com acionamento em tempo real -->
                 <div class="search-container">
                     <input type="text" id="search-input" placeholder="Pesquisar pelo nome..." oninput="filterItems()">
                 </div>
 
+                <!-- Visão dos Resultados de Busca -->
                 <div id="search-results-view" class="page" style="display: none;">
                     <button class="cancel-btn" onclick="closeSearch()">
                         ⬅ Voltar
@@ -37,6 +41,7 @@
                     <div class="items-grid" id="grid-search-results"></div>
                 </div>
 
+                <!-- Menu de Navegação Superior -->
                 <nav id="main-nav">
                     <button class="nav-btn active" onclick="switchPage('filmes', this)">Filmes</button>
                     <button class="nav-btn" onclick="switchPage('series', this)">Séries</button>
@@ -46,6 +51,7 @@
 
                 <button id="back-btn" style="display: none; margin-bottom: 20px;" class="cancel-btn">⬅ Voltar</button>
 
+                <!-- Páginas das Seções Principais e suas Subcategorias -->
                 <div id="filmes" class="page active">
                     <h2>🎬 Filmes - Escolha uma Categoria</h2>
                     <div class="menu-categorias">
@@ -84,6 +90,7 @@
                     </div>
                 </div>
 
+                <!-- Estrutura de Exibição dos Itens com Filtro de Status -->
                 <div id="subpage-view" class="page">
                     <h2 id="subpage-title">Categoria</h2>
                     
@@ -106,12 +113,14 @@
             </div>
         </div>
 
+        <!-- Botão Flutuante para Cadastrar Itens -->
         <button id="add-floating-btn" onclick="openModal()">+</button>
 
+        <!-- Modal Split de Cadastro/Edição -->
         <div id="item-modal" class="modal">
             <div class="modal-content modal-split">
                 <div class="modal-body-container">
-                    <!-- Aba Esquerda: Informações do Tesouro -->
+                    <!-- Coluna 1: Campos do Item -->
                     <div class="modal-section">
                         <h3 id="modal-title">Adicionar Novo Tesouro</h3>
                         <input type="text" id="form-name" placeholder="Nome / Título" required>
@@ -137,7 +146,7 @@
                         </select>
                     </div>
 
-                    <!-- Aba Direita: Comentários e Notas -->
+                    <!-- Coluna 2: Anotações e Opiniões -->
                     <div class="modal-section modal-section-comments">
                         <h3>💭 Comentários & Notas</h3>
                         <label for="form-comment">Sua opinião / observações:</label>
@@ -152,6 +161,7 @@
             </div>
         </div>
 
+        <!-- SDK do Firebase via CDN (Versão Compatível) -->
         <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
         <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
         <script src="script.js"></script>

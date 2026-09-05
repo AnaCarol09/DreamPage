@@ -1,3 +1,4 @@
+/* Paleta de Cores e Variáveis Globais */
 :root {
     --bg-color: #0f0f1a;
     --card-bg: #1c1c3a;
@@ -37,7 +38,7 @@ h1 {
     margin-bottom: 50px;
 }
 
-/* Tela de Login */
+/* Estilização da Tela de Login */
 #login-screen {
     background: var(--card-bg);
     padding: 40px;
@@ -92,7 +93,6 @@ h1 {
     font-size: 0.9rem;
 }
 
-/* Conteúdo Principal */
 #main-content {
     display: none;
 }
@@ -121,7 +121,7 @@ h1 {
     box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
 }
 
-/* Navegação Principal */
+/* Menu de Navegação Principal */
 #main-nav {
     display: flex;
     justify-content: center;
@@ -148,7 +148,6 @@ h1 {
     box-shadow: 0 0 15px var(--accent-color);
 }
 
-/* Gerenciamento de Páginas */
 .page {
     display: none;
 }
@@ -157,7 +156,7 @@ h1 {
     display: block;
 }
 
-/* Grid de Itens */
+/* Grid Autodimensionável para os Cards */
 .items-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -165,7 +164,7 @@ h1 {
     margin-top: 20px;
 }
 
-/* Card de Item Individual */
+/* Design dos Cards de Cada Item */
 .item-card {
     background: var(--card-bg);
     border-radius: 12px;
@@ -209,7 +208,7 @@ h1 {
     line-height: 1.3;
 }
 
-/* Ícone indicador de comentário ao lado do título */
+/* Ícone indicando a existência de comentários */
 .item-comment-icon {
     font-size: 0.9rem;
     margin-left: 5px;
@@ -236,7 +235,7 @@ h1 {
     color: var(--bg-color);
 }
 
-/* Botão de Deletar Card */
+/* Botão Flutuante de Exclusão do Card */
 .delete-btn {
     position: absolute;
     top: 8px;
@@ -262,7 +261,7 @@ h1 {
     transform: scale(1.1);
 }
 
-/* Botão Flutuante de Adicionar */
+/* Botão Flutuante de Adição (+) */
 #add-floating-btn {
     position: fixed;
     bottom: 30px;
@@ -289,7 +288,7 @@ h1 {
     box-shadow: 0 0 25px var(--success-color);
 }
 
-/* Modal Split (Lado a Lado) */
+/* Layout Responsivo do Modal (Lado a Lado em telas grandes) */
 .modal {
     display: none;
     position: fixed;
@@ -392,7 +391,7 @@ h1 {
     color: white;
 }
 
-/* Responsividade do Modal para Telas Pequenas */
+/* Ajuste Responsivo do Modal para Telas de Celulares */
 @media (max-width: 768px) {
     .modal-body-container {
         flex-direction: column;
@@ -408,7 +407,7 @@ h1 {
     }
 }
 
-/* Menu de Categorias Internas */
+/* Categorias de Botões Interativos */
 .menu-categorias {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -435,7 +434,7 @@ h1 {
     box-shadow: 0 0 15px var(--accent-color);
 }
 
-/* Navegação por Abas de Status */
+/* Seletor do Filtro de Status */
 .status-selector-nav {
     display: flex;
     gap: 10px;
@@ -468,7 +467,7 @@ h1 {
     width: 100%;
 }
 
-/* Tooltip da localização */
+/* Caixas Informativas Flutuantes (Tooltips na busca) */
 .item-card {
     position: relative;
 }
