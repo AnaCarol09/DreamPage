@@ -109,33 +109,45 @@
         <button id="add-floating-btn" onclick="openModal()">+</button>
 
         <div id="item-modal" class="modal">
-            <div class="modal-content">
-                <h3>Adicionar Novo Tesouro</h3>
-                <input type="text" id="form-name" placeholder="Nome / Título" required>
-                <input type="text" id="form-image" placeholder="URL da Imagem de Capa">
-                <input type="text" id="form-link" placeholder="Link (Onde assistir/ler/jogar)">
-                
-                <label for="form-page">Seção Principal:</label>
-                <select id="form-page" onchange="updateFormCategories()">
-                    <option value="filmes">Filmes</option>
-                    <option value="series">Séries</option>
-                    <option value="livros">Livros</option>
-                    <option value="jogos">Jogos</option>
-                </select>
+            <div class="modal-content modal-split">
+                <div class="modal-body-container">
+                    <!-- Aba Esquerda: Informações do Tesouro -->
+                    <div class="modal-section">
+                        <h3 id="modal-title">Adicionar Novo Tesouro</h3>
+                        <input type="text" id="form-name" placeholder="Nome / Título" required>
+                        <input type="text" id="form-image" placeholder="URL da Imagem de Capa">
+                        <input type="text" id="form-link" placeholder="Link (Onde assistir/ler/jogar)">
 
-                <label for="form-category">Categoria:</label>
-                <select id="form-category"></select>
+                        <label for="form-page">Seção Principal:</label>
+                        <select id="form-page" onchange="updateFormCategories()">
+                            <option value="filmes">Filmes</option>
+                            <option value="series">Séries</option>
+                            <option value="livros">Livros</option>
+                            <option value="jogos">Jogos</option>
+                        </select>
 
-                <label for="form-status">Status:</label>
-                <select id="form-status">
-                    <option value="visto">Finalizado</option>
-                    <option value="emprocesso">Em processo</option>
-                    <option value="naovisto">Um dia!</option>
-                </select>
+                        <label for="form-category">Categoria:</label>
+                        <select id="form-category"></select>
+
+                        <label for="form-status">Status:</label>
+                        <select id="form-status">
+                            <option value="visto">Finalizado</option>
+                            <option value="emprocesso">Em processo</option>
+                            <option value="naovisto">Um dia!</option>
+                        </select>
+                    </div>
+
+                    <!-- Aba Direita: Comentários e Notas -->
+                    <div class="modal-section modal-section-comments">
+                        <h3>💭 Comentários & Notas</h3>
+                        <label for="form-comment">Sua opinião / observações:</label>
+                        <textarea id="form-comment" placeholder="Escreva o que achou, notas, momentos marcantes..."></textarea>
+                    </div>
+                </div>
 
                 <div class="modal-actions">
                     <button onclick="closeModal()" class="cancel-btn">Cancelar</button>
-                    <button onclick="addItem()" class="save-btn">Salvar</button>
+                    <button onclick="addItem()" class="save-btn">Salvar Tudo</button>
                 </div>
             </div>
         </div>
